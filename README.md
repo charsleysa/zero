@@ -9,7 +9,7 @@ Zero.js is licensed under the terms of the MIT License.
 
 ## Building
 
-[![Build Status](https://api.travis-ci.org/charsleysa/zero.png?branch=master)](http://travis-ci.org/charsley/zero)
+[![Build Status](https://api.travis-ci.org/charsleysa/zero.png?branch=master)](http://travis-ci.org/charsleysa/zero)
 
 Check out Zero's source code and use the build commands.
 
