@@ -4,7 +4,6 @@ app     = express()
 module.exports = app
 
 project_root = __dirname.replace(/\/[^\/]+$/, '/')
-project_root = project_root.replace(/([^\\])+$/, '')
 console.log project_root
 app.use express.static(project_root)
 app.use express.static(project_root + 'node_modules/mocha')
