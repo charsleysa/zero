@@ -80,12 +80,12 @@ Zero modules are individual files in the "src/" directory.
     <td>Serialize &amp; submit web forms</td>
   </tr>
   <tr>
-    <th><a href="https://github.com/charsleysa/zero/blob/master/src/callbacks.js#files">fx</a></th>
+    <th><a href="https://github.com/charsleysa/zero/blob/master/src/callbacks.js#files">callbacks</a></th>
     <td>✔</td>
     <td>Zero equivalent of jQuery $.Callbacks (Thanks to @caitp https://github.com/caitp )</td>
   </tr>
   <tr>
-    <th><a href="https://github.com/charsleysa/zero/blob/master/src/deferred.js#files">fx</a></th>
+    <th><a href="https://github.com/charsleysa/zero/blob/master/src/deferred.js#files">deferred</a></th>
     <td>✔</td>
     <td>Zero equivalent of jQuery $.Deferred (Thanks to @caitp https://github.com/caitp )</td>
   </tr>
