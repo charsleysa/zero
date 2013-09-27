@@ -3,7 +3,7 @@
 //     Zero.js may be freely distributed under the MIT license.
 
 ;(function($){
-  var $$ = $.zero.qsa, handlers = {}, _zid = 1, specialEvents={},
+  var $$ = $.qsa, handlers = {}, _zid = 1, specialEvents={},
       hover = { mouseenter: 'mouseover', mouseleave: 'mouseout' }
 
   specialEvents.click = specialEvents.mousedown = specialEvents.mouseup = specialEvents.mousemove = 'MouseEvents'
@@ -234,7 +234,13 @@
     var event = document.createEvent(specialEvents[type] || 'Events'), bubbles = true
     if (props) for (var name in props) (name == 'bubbles') ? (bubbles = !!props[name]) : (event[name] = props[name])
     event.initEvent(type, bubbles, true)
-    event.isDefaultPrevented = function(){ return event.defaultPrevented }
+    // Workaround for IE since it has a stupid bug where it resets defaultPrevented after triggering
+    event.isDefaultPrevented = function(){ return event.hasPreventedDefault || event.defaultPrevented }
+    var oldPreventDefault = event.preventDefault
+    event.preventDefault = function(){
+        event.hasPreventedDefault = true
+        return oldPreventDefault.call(event)
+    }
     return event
   }
 

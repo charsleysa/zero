@@ -3,7 +3,7 @@
 //     Zero.js may be freely distributed under the MIT license.
 
 ;(function($){
-  var zero = $.zero, oldQsa = zero.qsa, oldMatches = zero.matches
+  var zero = $, oldQsa = zero.qsa, oldMatches = zero.matches
 
   function visible(elem){
     elem = $(elem)

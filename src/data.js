@@ -39,7 +39,7 @@
     $.each(node.attributes, function(i, attr){
       if (attr.name.indexOf('data-') == 0)
         store[camelize(attr.name.replace('data-', ''))] =
-          $.zero.deserializeValue(attr.value)
+          $.deserializeValue(attr.value)
     })
     return store
   }

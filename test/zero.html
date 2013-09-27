@@ -443,10 +443,9 @@
       },
 
       testAPI: function(t) {
-        t.assert('init' in $.zero)
-        t.assert('fragment' in $.zero)
-        t.assert('Z' in $.zero)
-        t.assert('isZ' in $.zero)
+        t.assert('init' in $)
+        t.assert('fragment' in $)
+        t.assert('isZ' in $)
         t.assertTrue($.isZ($()))
       },
 
@@ -2693,11 +2692,9 @@
 
       testDelegateEventProxy: function(t){
         var content
-        $('div#delegate_test').delegate('span.second-level', 'click', function(e){
+        $('div#delegate_test').on('click', 'span.second-level', function(e){
           t.assertEqual($('span.second-level').get(0), this)
           t.assertEqual($('span.second-level').get(0), e.currentTarget)
-          t.refuteEqual($('span.second-level').get(0), e.originalEvent.currentTarget)
-          t.assertEqual($('div#delegate_test').get(0), e.liveFired)
           content = $(this).html()
         })
         click($('span.second-level').get(0))

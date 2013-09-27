@@ -3,7 +3,7 @@
 //     Zero.js may be freely distributed under the MIT license.
 
 var Zero = (function() {
-  var undefined, key, $, classList, arr = Array.prototype, slice = arr.slice, filter = arr.filter,
+  var undefined, key, classList, arr = Array.prototype, slice = arr.slice, filter = arr.filter,
     document = window.document,
     elementDisplay = {}, classCache = {},
     cssNumber = { 'column-count': 1, 'columns': 1, 'font-weight': 1, 'line-height': 1,'opacity': 1, 'z-index': 1, 'zoom': 1 },
@@ -30,7 +30,6 @@ var Zero = (function() {
     tagSelectorRE = /^[\w-]+$/,
     class2type = {},
     toString = class2type.toString,
-    zero = {},
     camelize, uniq,
     tempParent = document.createElement('div')
 
@@ -47,19 +46,6 @@ var Zero = (function() {
         return null
       }
     }
-  }
-
-  zero.matches = function(element, selector) {
-    if (!element || element.nodeType !== 1) return false
-    var matchesSelector = element.webkitMatchesSelector || element.mozMatchesSelector ||
-                          element.oMatchesSelector || element.matchesSelector
-    if (matchesSelector) return matchesSelector.call(element, selector)
-    // fall back to performing a selector:
-    var match, parent = element.parentNode, temp = !parent
-    if (temp) (parent = tempParent).appendChild(element)
-    match = ~zero.qsa(parent, selector).indexOf(element)
-    temp && tempParent.removeChild(element)
-    return match
   }
 
   function type(obj) {
@@ -117,16 +103,44 @@ var Zero = (function() {
       $.map(element.childNodes, function(node){ if (node.nodeType == 1) return node })
   }
 
-  // `$.zero.fragment` takes a html string and an optional tag name
+  // `Zero` is the base object. When calling this
+  // function just call `$.init`, which makes the implementation
+  // details of selecting nodes and creating Zero collections
+  // patchable in plugins.
+  Zero = function(selector, context){
+    return new $.init(selector, context)
+  }
+  var $ = Zero // Alias
+
+  // `$.isZ` should return `true` if the given object is a Zero
+  // collection. This method can be overriden in plugins.
+  $.isZ = function(object) {
+    return object instanceof Zero
+  }
+
+  $.matches = function(element, selector) {
+    if (!element || element.nodeType !== 1) return false
+    var matchesSelector = element.webkitMatchesSelector || element.mozMatchesSelector ||
+                          element.oMatchesSelector || element.matchesSelector
+    if (matchesSelector) return matchesSelector.call(element, selector)
+    // fall back to performing a selector:
+    var match, parent = element.parentNode, temp = !parent
+    if (temp) (parent = tempParent).appendChild(element)
+    match = ~$.qsa(parent, selector).indexOf(element)
+    temp && tempParent.removeChild(element)
+    return match
+  }
+
+  // `$.fragment` takes a html string and an optional tag name
   // to generate DOM nodes nodes from the given html string.
   // The generated DOM nodes are returned as an array.
   // This function can be overriden in plugins for example to make
   // it compatible with browsers that don't support the DOM fully.
-  zero.fragment = function(html, name, properties) {
+  $.fragment = function(html, name, properties) {
     var dom, nodes, container
 
     // A special case optimization for a single tag
-    if (singleTagRE.test(html)) dom = $(document.createElement(RegExp.$1))
+    if (singleTagRE.test(html)) dom = document.createElement(RegExp.$1)
 
     if (!dom) {
       if (html.replace) html = html.replace(tagExpanderRE, "<$1></$2>")
@@ -151,60 +165,39 @@ var Zero = (function() {
     return dom
   }
 
-  // `$.zero.Z` is the core constructor for Zero
-  // It stores the `dom` array as a context to manipulate.
-  // This should not be overridden!!!
-  zero.Z = function(dom, selector) {
-    if (zero.isZ(dom)) return dom;
+  // `$.init` is Zero's counterpart to jQuery's `$.fn.init` and
+  // takes a CSS selector and an optional context (and handles various
+  // special cases).
+  // This method can be overriden in plugins.
+  $.init = function(selector, context) {
+    var dom
+    // If nothing given, return an empty Zero collection
+    if (selector){
+      // If a function is given, call it when the DOM is ready
+      if (isFunction(selector)) return $(document).ready(selector)
+      // If a Zero collection is given, just return it
+      else if ($.isZ(selector)) return selector
+      else {
+        // normalize array if an array of nodes is given
+        if (isArray(selector)) dom = compact(selector)
+        // Wrap DOM nodes.
+        else if (isObject(selector))
+          dom = [selector], selector = null
+        // If it's a html fragment, create nodes from it
+        else if (fragmentRE.test(selector))
+          dom = $.fragment(selector.trim(), RegExp.$1, context), selector = null
+        // If there's a context, create a collection on that context first, and select
+        // nodes from there
+        else if (context !== undefined) return $(context).find(selector)
+        // And last but no least, if it's a CSS selector, use it to select nodes.
+        else dom = $.qsa(document, selector)
+      }
+    }
+
     dom = dom || []
     dom = (dom instanceof Array) ? dom : [dom]
     this.context = dom
     this.selector = selector || ''
-  }
-
-  // `$.zero.isZ` should return `true` if the given object is a Zero
-  // collection. This method can be overriden in plugins.
-  zero.isZ = function(object) {
-    return object instanceof zero.Z
-  }
-
-  // `$.zero.init` is Zero's counterpart to jQuery's `$.fn.init` and
-  // takes a CSS selector and an optional context (and handles various
-  // special cases).
-  // This method can be overriden in plugins.
-  zero.init = function(selector, context) {
-    // If nothing given, return an empty Zero collection
-    if (!selector) return new zero.Z()
-    // If a function is given, call it when the DOM is ready
-    else if (isFunction(selector)) return $(document).ready(selector)
-    // If a Zero collection is given, juts return it
-    else if (zero.isZ(selector)) return selector
-    else {
-      var dom
-      // normalize array if an array of nodes is given
-      if (isArray(selector)) dom = compact(selector)
-      // Wrap DOM nodes.
-      else if (isObject(selector))
-        dom = [selector], selector = null
-      // If it's a html fragment, create nodes from it
-      else if (fragmentRE.test(selector))
-        dom = zero.fragment(selector.trim(), RegExp.$1, context), selector = null
-      // If there's a context, create a collection on that context first, and select
-      // nodes from there
-      else if (context !== undefined) return $(context).find(selector)
-      // And last but no least, if it's a CSS selector, use it to select nodes.
-      else dom = zero.qsa(document, selector)
-      // create a new Zero collection from the nodes found
-      return new zero.Z(dom, selector)
-    }
-  }
-
-  // `$` will be the base `Zero` object. When calling this
-  // function just call `$.zero.init, which makes the implementation
-  // details of selecting nodes and creating Zero collections
-  // patchable in plugins.
-  $ = function(selector, context){
-    return zero.init(selector, context)
   }
 
   function extend(target, source, deep) {
@@ -231,10 +224,10 @@ var Zero = (function() {
     return target
   }
 
-  // `$.zero.qsa` is Zero's CSS selector implementation which
+  // `$.qsa` is Zero's CSS selector implementation which
   // uses `document.querySelectorAll` and optimizes for some special cases, like `#id`.
   // This method can be overriden in plugins.
-  zero.qsa = function(element, selector){
+  $.qsa = function(element, selector){
     var found
     return (isDocument(element) && idSelectorRE.test(selector)) ?
       ( (found = element.getElementById(RegExp.$1)) ? [found] : [] ) :
@@ -299,7 +292,6 @@ var Zero = (function() {
   $.isWindow = isWindow
   $.isArray = isArray
   $.isPlainObject = isPlainObject
-  $.isZ = zero.isZ
 
   $.isEmptyObject = function(obj) {
     var name
@@ -362,10 +354,11 @@ var Zero = (function() {
 
   // Define methods that will be available on all
   // Zero collections
-  $.fn = {
+  $.fn = $.init.prototype = $.prototype = {
     // Allow fetching of the length directly on the Zero object
     get length() { return this.context.length },
-    set length(n) { this.context.length = 0 },
+
+    noop: function(){},
 
     // Have to define custom versions of these to work on the context
     forEach: function(){ return arr.forEach.apply(this.context, arguments) },
@@ -411,14 +404,14 @@ var Zero = (function() {
     filter: function(selector){
       if (isFunction(selector)) return this.not(this.not(selector))
       return $(filter.call(this.context, function(element){
-        return zero.matches(element, selector)
+        return $.matches(element, selector)
       }))
     },
     add: function(selector,context){
       return $(uniq(this.context.concat($(selector,context).get())))
     },
     is: function(selector){
-      return this.length > 0 && zero.matches(this.context[0], selector)
+      return this.length > 0 && $.matches(this.context[0], selector)
     },
     not: function(selector){
       var nodes=[]
@@ -462,14 +455,14 @@ var Zero = (function() {
             return $.contains(parent, node)
           })
         })
-      else if (this.length == 1) result = $(zero.qsa(this.context[0], selector))
-      else result = this.map(function(){ return zero.qsa(this, selector) })
+      else if (this.length == 1) result = $($.qsa(this.context[0], selector))
+      else result = this.map(function(){ return $.qsa(this, selector) })
       return result
     },
     closest: function(selector, context){
       var node = this.context[0], collection = false
       if (typeof selector == 'object') collection = $(selector)
-      while (node && !(collection ? collection.indexOf(node) >= 0 : zero.matches(node, selector)))
+      while (node && !(collection ? collection.indexOf(node) >= 0 : $.matches(node, selector)))
         node = node !== context && !isDocument(node) && node.parentNode
       return $(node)
     },
@@ -785,7 +778,7 @@ var Zero = (function() {
       var argType, nodes = $.map(arguments, function(arg) {
             argType = type(arg)
             var ret = argType == "object" || argType == "array" || arg == null ?
-              arg : zero.fragment(arg)
+              arg : $.fragment(arg)
             return $.isZ(ret) ? ret.context : ret
           }),
           parent, copyByClone = this.length > 1
@@ -823,14 +816,11 @@ var Zero = (function() {
     }
   })
 
-  zero.Z.prototype = $.fn
+  // Export internal API functions in the `Zero` namespace
+  $.uniq = uniq
+  $.deserializeValue = deserializeValue
 
-  // Export internal API functions in the `$.zero` namespace
-  zero.uniq = uniq
-  zero.deserializeValue = deserializeValue
-  $.zero = zero
-
-  return $
+  return Zero
 })()
 
 // If `$` is not yet defined, point it to `Zero`

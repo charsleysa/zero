@@ -39,7 +39,7 @@ target.dist = ->
 target.build = ->
   cd __dirname
   mkdir '-p', 'dist'
-  modules = (env['MODULES'] || 'zero detect event form fx').split(' ')
+  modules = (env['MODULES'] || 'zero detect event ajax form fx').split(' ')
   module_files = ( "src/#{module}.js" for module in modules )
   intro = "/* Zero #{describe_version()} - #{modules.join(' ')} */\n"
   dist = intro + cat(module_files).replace(/^\/[\/*].*$/mg, '').replace(/\n{3,}/g, "\n\n")
