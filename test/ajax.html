@@ -106,7 +106,7 @@
                           that.testCase.resume(function () {
                               if (fn) fn.apply(context, args)
                           })
-                      }, 5)
+                      }, 30)
                   })
               },
               handlers: function () {
@@ -159,11 +159,11 @@
                   t.pause()
                   var zeroXhr = $.ajax({
                       url: 'fixtures/ajax_load_simple.html',
-                      beforeSend: t.reg.handler('beforeSend'),
+                      beforeSend: t.reg.handler('beforesend'),
                       done: t.reg.handler('done'),
                       fail: t.reg.handler('fail'),
                       always: t.reg.resumeHandler('always', function () {
-                          t.assertEqualList('beforeSend ajaxBeforeSend ajaxStart done ajaxSuccess always ajaxStop', t.reg.events())
+                          t.assertEqualList('beforesend ajaxBeforeSend ajaxStart done ajaxSuccess always ajaxStop', t.reg.events())
                       })
                   })
                   t.assert($.isFunction(zeroXhr.get(0).getResponseHeader))
@@ -404,11 +404,11 @@
                   $.ajax({
                       url: 'fixtures/ajax_load_simple.html',
                       context: body,
-                      beforeSend: t.reg.handler('beforeSend'),
+                      beforeSend: t.reg.handler('beforesend'),
                       done: t.reg.handler('done'),
                       always: t.reg.resumeHandler('always', function () {
                           t.assertIdentical(body, this)
-                          t.assertIdentical(body, t.reg.context('beforeSend'))
+                          t.assertIdentical(body, t.reg.context('beforesend'))
                           t.assertIdentical(body, t.reg.context('done'))
                           t.assertIdentical(document.body, t.reg.target('ajaxBeforeSend'))
                           t.assertIdentical(document.body, t.reg.target('ajaxSuccess'))
@@ -745,13 +745,13 @@
               testCallbackOrder: function (t) {
                   var order = []
                   $.ajax({
-                      beforeSend: function () { order.push('beforeSend') },
+                      beforeSend: function () { order.push('beforesend') },
                       done: function () { order.push('done') },
                       always: function () { order.push('always') }
                   })
 
                   MockXHR.last.ready(4, 200, 'OK')
-                  t.assertEqual('beforeSend,done,always', order.join(','))
+                  t.assertEqual('beforesend,done,always', order.join(','))
               },
 
               testGlobalCallbacks: function (t) {
@@ -761,12 +761,12 @@
                   })
 
                   $.ajax({
-                      beforeSend: function () { fired.push('beforeSend') },
+                      beforeSend: function () { fired.push('beforesend') },
                       done: function () { fired.push('done') },
                       fail: function () { fired.push('fail') },
                       always: function () { fired.push('always') }
                   })
-                  t.assertEqual('beforeSend ajaxBeforeSend ajaxStart', fired.join(' '))
+                  t.assertEqual('beforesend ajaxBeforeSend ajaxStart', fired.join(' '))
 
                   fired = []
                   MockXHR.last.ready(4, 200, 'OK')
@@ -781,12 +781,12 @@
 
                   $.ajax({
                       global: false,
-                      beforeSend: function () { fired.push('beforeSend') },
+                      beforeSend: function () { fired.push('beforesend') },
                       done: function () { fired.push('done') },
                       fail: function () { fired.push('fail') },
                       always: function () { fired.push('always') }
                   })
-                  t.assertEqual('beforeSend', fired.join(' '))
+                  t.assertEqual('beforesend', fired.join(' '))
 
                   fired = []
                   MockXHR.last.ready(4, 200, 'OK')

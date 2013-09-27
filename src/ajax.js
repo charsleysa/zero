@@ -1,3 +1,7 @@
+//     Zero.js
+//     (c) 2013 Stefan Andres Charsley
+//     Zero.js may be freely distributed under the MIT license.
+
 ;(function ($) {
     var document = window.document,
         key,
@@ -66,7 +70,7 @@
             options.data instanceof ArrayBuffer)
             return
         if (options.processData && options.data && $.type(options.data) != "string"){
-            if (options.headers['Content-Type'] == undefined) options.headers['Content-Type'] = 'application/x-www-form-urlencoded'
+            options.headers['Content-Type'] = options.headers['Content-Type'] || 'application/x-www-form-urlencoded'
             options.data = $.param(options.data, options.traditional)
         }
         if (options.data && (!options.type || options.type.toUpperCase() == 'GET'))
@@ -89,7 +93,7 @@
 
         settings.headers = $.extend(baseHeaders, settings.headers || {})
 
-        // Create a zepto object from the xhr object
+        // Create a Zero object from the xhr object
         var zeroXHR = $(xhr)
 
         //HACK: this is a temporary fix for lack of support for the json responseType
@@ -107,9 +111,7 @@
                 this.response2 = this.response
             }
         })
-        if (settings.responseType == 'json'){
-            settings.headers['Accept'] = 'application/json'
-        }
+        if (settings.responseType == 'json') settings.headers['Accept'] = 'application/json'
 
         // Add function for upload progress hooking
         zeroXHR.uploadProgress = function(func){
@@ -120,7 +122,7 @@
                 callback.call(context, e, xhr)
             })
 
-            // Return the zero object for chaining
+            // Return the Zero object for chaining
             return this
         }
 
@@ -141,7 +143,7 @@
                 }
             })
 
-            // Return the zero object for chaining
+            // Return the Zero object for chaining
             return this
         }
 
@@ -154,7 +156,7 @@
                 callback.call(context, e.type, this, settings)
             })
 
-            // Return the zero object for chaining
+            // Return the Zero object for chaining
             return this
         }
 

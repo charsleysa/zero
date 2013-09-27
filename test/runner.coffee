@@ -15,7 +15,7 @@ if args.length > 0
   suites = args
 else
   # by default, run all test/*.html pages
-  modules = 'zero data detect event form fx selector stack'.split /\s+/
+  modules = 'zero data detect event form fx selector stack callbacks deferred'.split /\s+/
   suites = modules.map (name)-> "test/#{name}.html"
 
 page = require('webpage').create()

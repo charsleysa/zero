@@ -446,6 +446,9 @@
         t.assert('init' in $)
         t.assert('fragment' in $)
         t.assert('isZ' in $)
+        t.assertFalse($.isZ())
+        t.assertFalse($.isZ({}))
+        t.assertFalse($.isZ([]))
         t.assertTrue($.isZ($()))
       },
 
@@ -1787,11 +1790,12 @@
         t.assertEqual('plugin!', el.innerHTML)
 
         // test if existing zero objects receive new plugins
+        var $some_element = $('#some_element')
         $.fn.anotherplugin = function(){
           return this.each(function(){ this.innerHTML = 'anotherplugin!' })
         }
-        t.assert(typeof $('#some_element').anotherplugin == 'function')
-        $('#some_element').anotherplugin()
+        t.assert(typeof $some_element.anotherplugin == 'function')
+        $some_element.anotherplugin()
         t.assertEqual('anotherplugin!', el.innerHTML)
       },
 
