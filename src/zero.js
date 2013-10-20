@@ -197,7 +197,6 @@ var Zero = (function() {
     dom = dom || []
     dom = isArray(dom) ? dom : [dom]
     $.merge(this, dom)
-    this.context = this
     this.selector = selector || ''
   }
 
@@ -379,20 +378,20 @@ var Zero = (function() {
     noop: function(){},
 
     // Have to define custom versions of these to work on the context
-    forEach: function(){ return arr.forEach.apply(this.context, arguments) },
-    reduce: function(){ return arr.reduce.apply(this.context, arguments) },
-    push: function(){ return arr.push.apply(this.context, arguments) },
-    sort: function(){ return arr.sort.apply(this.context, arguments) },
-    indexOf: function(){ return arr.indexOf.apply(this.context, arguments) },
-    concat: function(){ return arr.concat.apply(this.context, arguments) },
+    forEach: arr.forEach,
+    reduce: arr.reduce,
+    push: arr.push,
+    sort: arr.sort,
+    indexOf: arr.indexOf,
+    concat: arr.concat,
 
     // `map` and `slice` in the jQuery API work differently
     // from their array counterparts
     map: function(fn){
-      return $($.map(this.context, function(el, i){ return fn.call(el, i, el) }))
+      return $($.map(this, function(el, i){ return fn.call(el, i, el) }))
     },
     slice: function(){
-      return $(slice.apply(this.context, arguments))
+      return $(slice.apply(this, arguments))
     },
 
     ready: function(callback){
@@ -401,11 +400,11 @@ var Zero = (function() {
       return this
     },
     get: function(idx){
-      return idx === undefined ? slice.call(this.context) : this.context[idx >= 0 ? idx : idx + this.context.length]
+      return idx === undefined ? slice.call(this) : this[idx >= 0 ? idx : idx + this.length]
     },
     toArray: function(){ return this.get() },
     size: function(){
-      return this.context.length
+      return this.length
     },
     remove: function(){
       return this.each(function(){
@@ -414,14 +413,14 @@ var Zero = (function() {
       })
     },
     each: function(callback){
-      arr.every.call(this.context, function(el, idx){
+      arr.every.call(this, function(el, idx){
         return callback.call(el, idx, el) !== false
       })
       return this
     },
     filter: function(selector){
       if (isFunction(selector)) return this.not(this.not(selector))
-      return $(filter.call(this.context, function(element){
+      return $(filter.call(this, function(element){
         return $.matches(element, selector)
       }))
     },
@@ -429,7 +428,7 @@ var Zero = (function() {
       return $(uniq(arr.concat(this.get(), $(selector,context).get())))
     },
     is: function(selector){
-      return this.length > 0 && $.matches(this.context[0], selector)
+      return this.length > 0 && $.matches(this[0], selector)
     },
     not: function(selector){
       var nodes=[]
@@ -454,14 +453,14 @@ var Zero = (function() {
       })
     },
     eq: function(idx){
-      return $(idx === -1 ? this.context.slice(idx) : this.context.slice(idx, + idx + 1))
+      return $(idx === -1 ? this.slice(idx) : this.slice(idx, + idx + 1))
     },
     first: function(){
-      var el = this.context[0]
+      var el = this[0]
       return el && !isObject(el) ? el : $(el)
     },
     last: function(){
-      var el = this.context[this.length - 1]
+      var el = this[this.length - 1]
       return el && !isObject(el) ? el : $(el)
     },
     find: function(selector){
@@ -469,23 +468,23 @@ var Zero = (function() {
       if (typeof selector == 'object')
         result = $(selector).filter(function(){
           var node = this
-          return arr.some.call($this.context, function(parent){
+          return arr.some.call($this, function(parent){
             return $.contains(parent, node)
           })
         })
-      else if (this.length == 1) result = $($.qsa(this.context[0], selector))
+      else if (this.length == 1) result = $($.qsa(this[0], selector))
       else result = this.map(function(){ return $.qsa(this, selector) })
       return result
     },
     closest: function(selector, context){
-      var node = this.context[0], collection = false
+      var node = this[0], collection = false
       if (typeof selector == 'object') collection = $(selector)
       while (node && !(collection ? collection.indexOf(node) >= 0 : $.matches(node, selector)))
         node = node !== context && !isDocument(node) && node.parentNode
       return $(node)
     },
     parents: function(selector){
-      var ancestors = [], nodes = this.context
+      var ancestors = [], nodes = this
       while (nodes.length > 0)
         nodes = $.map(nodes, function(node){
           if ((node = node.parentNode) && !isDocument(node) && ancestors.indexOf(node) < 0) {
@@ -514,7 +513,7 @@ var Zero = (function() {
     },
     // `pluck` is borrowed from Prototype.js
     pluck: function(property){
-      return $.map(this.context, function(el){ return el[property] })
+      return $.map(this, function(el){ return el[property] })
     },
     show: function(){
       return this.each(function(){
@@ -528,7 +527,7 @@ var Zero = (function() {
     },
     wrap: function(structure){
       var func = isFunction(structure)
-      if (this.context[0] && !func)
+      if (this[0] && !func)
         var dom   = $(structure).get(0),
             clone = dom.parentNode || this.length > 1
 
@@ -540,12 +539,12 @@ var Zero = (function() {
       })
     },
     wrapAll: function(structure){
-      if (this.context[0]) {
-        $(this.context[0]).before(structure = $(structure))
+      if (this[0]) {
+        $(this[0]).before(structure = $(structure))
         var children
         // drill down to the inmost element
         while ((children = structure.children()).length) structure = children.first()
-        $(structure).append(this.context)
+        $(structure).append(this)
       }
       return this
     },
@@ -579,7 +578,7 @@ var Zero = (function() {
     next: function(selector){ return $(this.pluck('nextElementSibling')).filter(selector || '*') },
     html: function(html){
       return arguments.length === 0 ?
-        (this.context.length > 0 ? this.context[0].innerHTML : null) :
+        (this.length > 0 ? this[0].innerHTML : null) :
         this.each(function(idx){
           var originHtml = this.innerHTML
           $(this).empty().append( funcArg(this, html, idx, originHtml) )
@@ -587,15 +586,15 @@ var Zero = (function() {
     },
     text: function(text){
       return arguments.length === 0 ?
-        (this.context.length > 0 ? this.context[0].textContent : null) :
+        (this.length > 0 ? this[0].textContent : null) :
         this.each(function(){ this.textContent = (text === undefined) ? '' : ''+text })
     },
     attr: function(name, value){
       var result
       return (typeof name == 'string' && value === undefined) ?
-        (this.context.length == 0 || this.context[0].nodeType !== 1 ? undefined :
-          (name == 'value' && this.context[0].nodeName == 'INPUT') ? this.val() :
-          (!(result = this.context[0].getAttribute(name)) && name in this.context[0]) ? this.context[0][name] : result
+        (this.length == 0 || this[0].nodeType !== 1 ? undefined :
+          (name == 'value' && this[0].nodeName == 'INPUT') ? this.val() :
+          (!(result = this[0].getAttribute(name)) && name in this[0]) ? this[0][name] : result
         ) :
         this.each(function(idx){
           if (this.nodeType !== 1) return
@@ -608,7 +607,7 @@ var Zero = (function() {
     },
     prop: function(name, value){
       return (value === undefined) ?
-        (this.context[0] && this.context[0][name]) :
+        (this[0] && this[0][name]) :
         this.each(function(idx){
           this[name] = funcArg(this, value, idx, this[name])
         })
@@ -619,9 +618,9 @@ var Zero = (function() {
     },
     val: function(value){
       return arguments.length === 0 ?
-        (this.context[0] && (this.context[0].multiple ?
-           $(this.context[0]).find('option').filter(function(o){ return this.selected }).pluck('value') :
-           this.context[0].value)
+        (this[0] && (this[0].multiple ?
+           $(this[0]).find('option').filter(function(o){ return this.selected }).pluck('value') :
+           this[0].value)
         ) :
         this.each(function(idx){
           this.value = funcArg(this, value, idx, this.value)
@@ -640,8 +639,8 @@ var Zero = (function() {
         if ($this.css('position') == 'static') props['position'] = 'relative'
         $this.css(props)
       })
-      if (this.context.length==0) return null
-      var obj = this.context[0].getBoundingClientRect()
+      if (this.length==0) return null
+      var obj = this[0].getBoundingClientRect()
       return {
         left: obj.left + window.pageXOffset,
         top: obj.top + window.pageYOffset,
@@ -651,7 +650,7 @@ var Zero = (function() {
     },
     css: function(property, value){
       if (arguments.length < 2) {
-        var element = this.context[0], computedStyle = getComputedStyle(element, '')
+        var element = this[0], computedStyle = getComputedStyle(element, '')
         if(!element) return
         if (typeof property == 'string')
           return element.style[camelize(property)] || computedStyle.getPropertyValue(property)
@@ -681,10 +680,10 @@ var Zero = (function() {
       return this.each(function(){ this.style.cssText += ';' + css })
     },
     index: function(element){
-      return element ? this.indexOf($(element).get(0)) : this.parent().children().indexOf(this.context[0])
+      return element ? this.indexOf($(element).get(0)) : this.parent().children().indexOf(this[0])
     },
     hasClass: function(name){
-      return arr.some.call(this.context, function(el){
+      return arr.some.call(this, function(el){
         return this.test(className(el))
       }, classRE(name))
     },
@@ -718,9 +717,9 @@ var Zero = (function() {
       })
     },
     scrollTop: function(value){
-      if (!this.context.length) return
-      var hasScrollTop = 'scrollTop' in this.context[0]
-      if (value === undefined) return hasScrollTop ? this.context[0].scrollTop : this.context[0].pageYOffset
+      if (!this.length) return
+      var hasScrollTop = 'scrollTop' in this[0]
+      if (value === undefined) return hasScrollTop ? this[0].scrollTop : this[0].pageYOffset
       return this.each(hasScrollTop ?
         function(){ this.scrollTop = value } :
         function(){ this.scrollTo(this.scrollX, value) })
@@ -728,7 +727,7 @@ var Zero = (function() {
     position: function() {
       if (!this.length) return
 
-      var elem = this.context[0],
+      var elem = this[0],
         // Get *real* offsetParent
         offsetParent = this.offsetParent(),
         // Get correct offsets
@@ -770,7 +769,7 @@ var Zero = (function() {
       dimension.replace(/./, function(m){ return m[0].toUpperCase() })
 
     $.fn[dimension] = function(value){
-      var offset, el = this.context[0]
+      var offset, el = this[0]
       if (value === undefined) return isWindow(el) ? el['inner' + dimensionProperty] :
         isDocument(el) ? el.documentElement['scroll' + dimensionProperty] :
         (offset = this.offset()) && offset[dimension]

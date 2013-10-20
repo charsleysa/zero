@@ -506,9 +506,9 @@
 
       testGetWithIndex: function(t){
         var zero = $('#find1 .findme')
-        t.assertEqual(zero.context[0], zero.get(0))
-        t.assertEqual(zero.context[zero.context.length - 1], zero.get(-1))
-        t.assertUndefined(zero.get(zero.context.length))
+        t.assertEqual(zero[0], zero.get(0))
+        t.assertEqual(zero[zero.length - 1], zero.get(-1))
+        t.assertUndefined(zero.get(zero.length))
       },
 
       testSize: function(t){
@@ -2299,9 +2299,9 @@
       testSort: function(t){
         var els = $(['eight', 'nine', 'ten', 'eleven'])
         var result = $(els.sort(function(a,b){ return b.length > a.length ? -1 : 1 }))
-        t.assertEqualCollection(els.context, result.context)
+        t.assertEqualCollection(els, result)
         t.assertEqual(4, result.size())
-        t.assertEqualCollection(['ten', 'nine', 'eight', 'eleven'], result.context)
+        t.assertEqualCollection(['ten', 'nine', 'eight', 'eleven'], result)
       }
     })
 
