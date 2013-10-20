@@ -11,6 +11,11 @@ Zero.js is licensed under the terms of the MIT License.
 
 [![Build Status](https://api.travis-ci.org/charsleysa/zero.png?branch=master)](http://travis-ci.org/charsleysa/zero)
 
+Q: Why is the build failing?
+A: The build fails because Zero uses code that is buggy in old versions of QtWebkit which PhantomJS uses.
+   This problem should no longer exist when PhantomJS 2 is released.
+   Testing the build in your web browser will succeed.
+
 Check out Zero's source code and use the build commands.
 
 You will need Node.js installed on your system.
