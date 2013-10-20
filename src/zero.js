@@ -30,7 +30,7 @@ var Zero = (function() {
     tagSelectorRE = /^[\w-]+$/,
     class2type = {},
     toString = class2type.toString,
-    camelize, uniq,
+    uniq,
     tempParent = document.createElement('div')
 
   // getComputedStyle shouldn't freak out when called
@@ -65,7 +65,7 @@ var Zero = (function() {
 
   function compact(array) { return filter.call(array, function(item){ return item != null }) }
   function flatten(array) { return array.length > 0 ? arr.concat.apply([], array) : array }
-  camelize = function(str){ return str.replace(/-+(.)?/g, function(match, chr){ return chr ? chr.toUpperCase() : '' }) }
+  function camelize(str)  { return str.replace(/-+(.)?/g, function(match, chr){ return chr ? chr.toUpperCase() : '' }) }
   function dasherize(str) {
     return str.replace(/::/g, '/')
            .replace(/([A-Z]+)([A-Z][a-z])/g, '$1_$2')
@@ -195,8 +195,9 @@ var Zero = (function() {
     }
 
     dom = dom || []
-    dom = (dom instanceof Array) ? dom : [dom]
-    this.context = dom
+    dom = isArray(dom) ? dom : [dom]
+    $.merge(this, dom)
+    this.context = this
     this.selector = selector || ''
   }
 
@@ -341,6 +342,18 @@ var Zero = (function() {
     return elements
   }
 
+  $.merge = function( first, second ) {
+    var len = +second.length,
+      j = 0,
+      i = first.length
+    
+    for ( ; j < len; j++ ) first[i++] = second[j]
+    
+    first.length = i
+    
+    return first
+  }
+
   $.grep = function(elements, callback){
     return filter.call(elements, callback)
   }
@@ -356,7 +369,12 @@ var Zero = (function() {
   // Zero collections
   $.fn = $.init.prototype = $.prototype = {
     // Allow fetching of the length directly on the Zero object
-    get length() { return this.context.length },
+    get length() { return this._length || 0 },
+    set length(n) {
+      var len = this._length
+      if (len > n) arr.reduce.call(this, len - (n - len), (n - len))
+      this._length = n
+    },
 
     noop: function(){},
 
@@ -408,7 +426,7 @@ var Zero = (function() {
       }))
     },
     add: function(selector,context){
-      return $(uniq(this.context.concat($(selector,context).get())))
+      return $(uniq(arr.concat(this.get(), $(selector,context).get())))
     },
     is: function(selector){
       return this.length > 0 && $.matches(this.context[0], selector)
@@ -484,7 +502,7 @@ var Zero = (function() {
       return filtered(this.map(function(){ return children(this) }), selector)
     },
     contents: function() {
-      return this.map(function() { return slice.call(this.childNodes) })
+      return this.map(function() { return this.contentDocument || slice.call(this.childNodes) })
     },
     siblings: function(selector){
       return filtered(this.map(function(i, el){
@@ -776,12 +794,12 @@ var Zero = (function() {
     $.fn[operator] = function(){
       // arguments can be nodes, arrays of nodes, and HTML strings but not Zero objects
       var argType, nodes = $.map(arguments, function(arg) {
-            argType = type(arg)
-            var ret = argType == "object" || argType == "array" || arg == null ?
-              arg : $.fragment(arg)
-            return $.isZ(ret) ? ret.context : ret
-          }),
-          parent, copyByClone = this.length > 1
+        argType = type(arg)
+        var ret = argType == "object" || argType == "array" || argType == "null" ?
+          arg : $.fragment(arg)
+        return $.isZ(ret) ? flatten(ret) : ret
+      }),
+      parent, copyByClone = this.length > 1
       if (nodes.length < 1) return this
 
       return this.each(function(_, target){
