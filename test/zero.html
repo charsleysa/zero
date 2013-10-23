@@ -532,12 +532,12 @@
         t.assertEqual(element, z1.get(0))
 
         var z2 = $([element, null, undefined])
-        t.assertLength(1, z2)
+        t.assertLength(3, z2)
         t.assertEqual(element, z2.get(0))
 
         var z3 = $([null, element, null])
-        t.assertLength(1, z3)
-        t.assertEqual(element, z3.get(0))
+        t.assertLength(3, z3)
+        t.assertEqual(undefined, z3.get(0))
       },
 
       testDollarWithContext: function(t){
