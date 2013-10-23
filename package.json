@@ -22,5 +22,6 @@
     , "express": "3.1.x"
     , "coffee-script": "1.5.x"
     , "shelljs": "0.1.x"
+    , "phantomjs": "1.9.x"
   }
 }

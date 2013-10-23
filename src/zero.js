@@ -796,7 +796,7 @@ var Zero = (function() {
         argType = type(arg)
         var ret = argType == "object" || argType == "array" || argType == "null" ?
           arg : $.fragment(arg)
-        return $.isZ(ret) ? flatten(ret) : ret
+        return $.isZ(ret) ? $.merge([],ret) : ret
       }),
       parent, copyByClone = this.length > 1
       if (nodes.length < 1) return this

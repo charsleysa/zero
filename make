@@ -1,6 +1,7 @@
 #!/usr/bin/env coffee
 require 'shelljs/make'
 fs = require 'fs'
+os = require 'os'
 
 version   = '1.0.0'
 zero_js  = 'dist/zero.js'
@@ -19,7 +20,8 @@ target.all = ->
 target.test = ->
   test_app = require './test/server'
   server = test_app.listen port
-  exec "phantomjs test/runner.coffee 'http://localhost:#{port}/'", (code) ->
+  command = if os.platform() == "win32" then "start .\\node_modules\\.bin\\" else "./node_modules/.bin/"
+  exec command + "phantomjs test/runner.coffee 'http://localhost:#{port}/'", (code) ->
     server.close -> exit(code)
 
 target[zero_js] = ->
