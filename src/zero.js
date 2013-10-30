@@ -22,12 +22,12 @@ var Zero = (function() {
         },
         readyRE = /complete|loaded|interactive/,
         //classSelectorRE = /^\.([\w-]+)$/,
-        idSelectorRE = /^#([\w-]*)$/,
+        //idSelectorRE = /^#([\w-]*)$/,
         //tagSelectorRE = /^[\w-]+$/,
         fragmentRE = /^\s*<(\w+|!)[^>]*>/,
         singleTagRE = /^<(\w+)\s*\/?>(?:<\/\1>|)$/,
-        tagclassSelectorRE = /^(?:([\w]+)|([\w]+)?\.([\w\-]+))$/,
-        selectorGroupRE = /(([^,]*([\[].*?[\]]))|([^,].*?))+/g,
+        tagIdClassSelectorRE = /^(?:#([\w-]+)*|(\w+)|\.([\w-]+))$/,
+        //selectorGroupRE = /(([^,]*([\[].*?[\]]))|([^,].*?))+/g,
         tagExpanderRE = /<(?!area|br|col|embed|hr|img|input|link|meta|param)(([\w:]+)[^>]*)\/>/ig,
         rootNodeRE = /^(?:body|html)$/i,
         class2type = {},
@@ -174,25 +174,27 @@ var Zero = (function() {
         var dom
         // If nothing given, return an empty Zero collection
         if (!selector) return this
-        // If a function is given, call it when the DOM is ready
-        if (isFunction(selector)) return $(document).ready(selector)
-        // If a Zero collection is given, just return it
-        else if ($.isZ(selector)) return selector
-        else {
-            // Don't bother checking for nulls, the developer should do that
-            if (isArray(selector)) dom = selector
-            // Wrap DOM nodes.
-            else if (isObject(selector))
-                dom = [selector], selector = null
+        // If the selector is a string, assume its a query selector or html fragment
+        else if (type(selector) === "string"){
             // If it's a html fragment, create nodes from it
-            else if (selector[0] === "<" && selector[selector.length - 1] === ">" && selector.length >= 3 || fragmentRE.test(selector))
-                dom = $.fragment(selector.trim(), RegExp.$1, context), selector = null
+            if ((selector = selector.trim()) && selector[0] === "<" && selector[selector.length - 1] === ">" && selector.length >= 3) {
+                fragmentRE.test(selector)
+                dom = $.fragment(selector, RegExp.$1, context), selector = null
+            }
             // If there's a context, create a collection on that context first, and select
             // nodes from there
             else if (context !== undefined) return $(context).find(selector)
             // And last but no least, if it's a CSS selector, use it to select nodes.
             else dom = $.qsa(document, selector)
         }
+        // If a function is given, call it when the DOM is ready
+        else if (isFunction(selector)) return $(document).ready(selector)
+        // If a Zero collection is given, just return it
+        else if ($.isZ(selector)) return selector
+        else if (isArray(selector)) dom = selector
+        // Wrap DOM nodes.
+        else if (isObject(selector)) dom = [selector], selector = null
+        else return this
 
         dom = dom || []
         dom = isArray(dom) ? dom : [dom]
@@ -228,42 +230,19 @@ var Zero = (function() {
     // uses `document.querySelectorAll` and optimizes for some special cases, like `#id`.
     // This method can be overriden in plugins.
     $.qsa = function(root, selector) {
-
-		var match, node, ret, m, i, j
-
+		var node
         if (root.nodeType !== 1 && root.nodeType !== 9) return []
+		if (tagIdClassSelectorRE.test(selector)) {
+            if (RegExp.$2) return slice.call(root.getElementsByTagName(RegExp.$2))
+            else if (RegExp.$3) return slice.call(root.getElementsByClassName(RegExp.$3))
+            else if (RegExp.$1) {
+                if (isDocument(root)) return ((node = root.getElementById(RegExp.$1)) ? [node] : [])
+                else if (root.ownerDocument && (node = root.ownerDocument.getElementById(RegExp.$1))) return [node]
+            }
+            else if (RegExp.$_.length == 1) return []
+        }
+        return slice.call(root.querySelectorAll(selector))
 
-		// ID
-		if (match = idSelectorRE.exec(selector)) {
-            if (isDocument(root)) return (node = document.getElementById(match[1])) ? [node] : []
-			return $.merge([], root.querySelectorAll(match[0]))
-
-		// Tag, Class, and Tag.Class
-		} else if (match = tagclassSelectorRE.exec(selector)) {
-
-			// Tag
-			if (m = match[1])
-				return $.merge([], root.getElementsByTagName(m))
-
-			m = match[3];
-
-			// Class
-			if (!match[2])
-				return $.merge([], root.getElementsByClassName(m))
-
-			// Tag.Class
-			return $.merge([], root.querySelectorAll(selector))
-
-		// Multiple selectors / complex selectors
-		} else if (match = selector.match(selectorGroupRE)) {
-			ret = []
-
-            if (match.length == 1) return $.merge(ret, root.querySelectorAll(match[0]))
-
-			for (i = 0; node = match[i]; i++)
-				arr.push.apply(ret, $.qsa(root, node))
-			return ret
-		}
 	}
 
     function filtered(nodes, selector) {

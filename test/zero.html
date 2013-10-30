@@ -1303,8 +1303,8 @@
         var targets = $('#find1 span span, #find1 b, #find2 span')
         var found = $('p#find1').find(targets)
         t.assertLength(2, found)
-        t.assertEqual('B', found.get(1).tagName)
-        t.assertEqual('6', found.get(0).innerHTML)
+        t.assertEqual('B', found.get(0).tagName)
+        t.assertEqual('6', found.get(1).innerHTML)
       },
 
       testFindWithElement: function(t){
