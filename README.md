@@ -5,6 +5,8 @@ largely jQuery-compatible API. If you use jQuery or Zepto, you already know how 
 
 Zero began as a fork from Zepto.js but has had its internals restructured to be compatible with all modern browsers.
 
+Zero also has performance improvements that surpass that of Zepto.js and in some cases even jQuery 2.
+
 Zero.js is licensed under the terms of the MIT License.
 
 ## Building
@@ -149,11 +151,9 @@ Please note that most of the API's marked deprecated in the Zepto.js documentati
 
 ### Running tests
 
-You will need to install [PhantomJS][]. On OS X, that's easy:
+You will need to install [PhantomJS][phantomjs].
 
-~~~ sh
-$ brew install phantomjs
-~~~
+If you use Node.js it will automatically be installed as a dependancy when you run the `npm install` command.
 
 To run the test suite, these are all equivalent:
 
