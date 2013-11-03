@@ -1,6 +1,6 @@
-//         Zero.js
-//         (c) 2013 Stefan Andres Charsley
-//         Zero.js may be freely distributed under the MIT license.
+//     Zero.js
+//     (c) 2013 Stefan Andres Charsley
+//     Zero.js may be freely distributed under the MIT license.
 
 var Zero = (function() {
     var undefined, key, classList, arr = Array.prototype, slice = arr.slice, filter = arr.filter,
@@ -21,13 +21,9 @@ var Zero = (function() {
             '*': document.createElement('div')
         },
         readyRE = /complete|loaded|interactive/,
-        //classSelectorRE = /^\.([\w-]+)$/,
-        //idSelectorRE = /^#([\w-]*)$/,
-        //tagSelectorRE = /^[\w-]+$/,
         fragmentRE = /^\s*<(\w+|!)[^>]*>/,
         singleTagRE = /^<(\w+)\s*\/?>(?:<\/\1>|)$/,
         tagIdClassSelectorRE = /^(?:#([\w-]+)*|(\w+)|\.([\w-]+))$/,
-        //selectorGroupRE = /(([^,]*([\[].*?[\]]))|([^,].*?))+/g,
         tagExpanderRE = /<(?!area|br|col|embed|hr|img|input|link|meta|param)(([\w:]+)[^>]*)\/>/ig,
         rootNodeRE = /^(?:body|html)$/i,
         class2type = {},
@@ -55,10 +51,10 @@ var Zero = (function() {
             class2type[toString.call(obj)] || "object"
     }
 
-    function isFunction(value) { return type(value) == "function" }
-    function isWindow(obj)         { return obj != null && obj == obj.window }
-    function isDocument(obj)     { return obj != null && obj.nodeType == obj.DOCUMENT_NODE }
-    function isObject(obj)         { return type(obj) == "object" }
+    function isFunction(value)  { return type(value) == "function" }
+    function isWindow(obj)      { return obj != null && obj == obj.window }
+    function isDocument(obj)    { return obj != null && obj.nodeType == obj.DOCUMENT_NODE }
+    function isObject(obj)      { return type(obj) == "object" }
     function isPlainObject(obj) {
         return isObject(obj) && !isWindow(obj) && Object.getPrototypeOf(obj) == Object.prototype
     }
@@ -67,13 +63,13 @@ var Zero = (function() {
 
     function compact(array) { return filter.call(array, function(item){ return item != null }) }
     function flatten(array) { return array.length > 0 ? arr.concat.apply([], array) : array }
-    function camelize(str)    { return str.replace(/-+(.)?/g, function(match, chr){ return chr ? chr.toUpperCase() : '' }) }
+    function camelize(str)  { return str.replace(/-+(.)?/g, function(match, chr){ return chr ? chr.toUpperCase() : '' }) }
     function dasherize(str) {
         return str.replace(/::/g, '/')
-                     .replace(/([A-Z]+)([A-Z][a-z])/g, '$1_$2')
-                     .replace(/([a-z\d])([A-Z])/g, '$1_$2')
-                     .replace(/_/g, '-')
-                     .toLowerCase()
+            .replace(/([A-Z]+)([A-Z][a-z])/g, '$1_$2')
+            .replace(/([a-z\d])([A-Z])/g, '$1_$2')
+            .replace(/_/g, '-')
+            .toLowerCase()
     }
     uniq = function(array){ return filter.call(array, function(item, idx){ return array.indexOf(item) == idx }) }
 
@@ -264,7 +260,7 @@ var Zero = (function() {
     // access className property while respecting SVGAnimatedString
     function className(node, value){
         var klass = node.className,
-                svg     = klass && klass.baseVal !== undefined
+            svg = klass && klass.baseVal !== undefined
 
         if (value === undefined) return svg ? klass.baseVal : klass
         svg ? (klass.baseVal = value) : (node.className = value)
@@ -635,12 +631,12 @@ var Zero = (function() {
         offset: function(coordinates){
             if (coordinates) return this.each(function(index){
                 var $this = $(this),
-                        coords = funcArg(this, coordinates, index, $this.offset()),
-                        parentOffset = $this.offsetParent().offset(),
-                        props = {
-                            top:    coords.top    - parentOffset.top,
-                            left: coords.left - parentOffset.left
-                        }
+                    coords = funcArg(this, coordinates, index, $this.offset()),
+                    parentOffset = $this.offsetParent().offset(),
+                    props = {
+                        top:  coords.top  - parentOffset.top,
+                        left: coords.left - parentOffset.left
+                    }
 
                 if ($this.css('position') == 'static') props['position'] = 'relative'
                 $this.css(props)
