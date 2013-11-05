@@ -1,4 +1,8 @@
 .DS_Store
+dist/
+dist/zero.min.gz
+dist/zero.min.js
+dist/zero.js
 pkg
 *.swp
 docs/*

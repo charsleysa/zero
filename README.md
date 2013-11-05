@@ -34,6 +34,20 @@ $ coffee make dist
 $ MODULES="zero event data ..." ./make dist
 ~~~
 
+## Pre-compiled files
+
+A pre-compiled version of Zero is available at [jsDelivr][jsdelivrzero].
+
+This contains all the modules that are ticked in the Zero modules section below.
+
+```html
+<!-- Uncompressed -->
+<script type="text/javascript" src="//cdn.jsdelivr.net/zero.js/1.0.0/zero.js"></script>
+
+<!-- Minified -->
+<script type="text/javascript" src="//cdn.jsdelivr.net/zero.js/1.0.0/zero.min.js"></script>
+```
+
 ## Zero modules
 
 Zero modules are individual files in the "src/" directory.
@@ -172,3 +186,4 @@ you can serve the whole Zero folder on a web server and open
   [mkd]: http://github.github.com/github-flavored-markdown/
   [evidence.js]: https://github.com/tobie/Evidence
   [phantomjs]: http://code.google.com/p/phantomjs/wiki/Installation
+  [jsdelivrzero]: http://www.jsdelivr.com/#!zero.js
