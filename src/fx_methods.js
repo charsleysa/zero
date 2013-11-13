@@ -24,8 +24,7 @@
     }
 
     $.fn.show = function(speed, callback) {
-        origShow.call(this)
-        if (speed === undefined) speed = 0
+        if (speed === undefined) return origShow.call(this)
         else this.css('opacity', 0)
         return anim(this, speed, 1, '1,1', callback)
     }
