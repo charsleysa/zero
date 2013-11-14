@@ -774,11 +774,17 @@ var Zero = (function() {
             var offset, el = this[0]
             if (value === undefined) return isWindow(el) ? el['inner' + dimensionProperty] :
                 isDocument(el) ? el.documentElement['scroll' + dimensionProperty] :
-                (offset = this.offset()) && offset[dimension]
+                parseFloat(this.css(dimension)) || null
             else return this.each(function(idx){
                 el = $(this)
                 el.css(dimension, funcArg(this, value, idx, el[dimension]()))
             })
+        }
+        $.fn["outer" + dimensionProperty] = function(value){
+            var offset, el = this[0]
+            return isWindow(el) ? el['outer' + dimensionProperty] :
+                isDocument(el) ? el.documentElement['scroll' + dimensionProperty] :
+                (offset = this.offset()) && offset[dimension]
         }
     })
 
