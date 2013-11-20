@@ -1,7 +1,7 @@
 # Zero.js – a minimalist JavaScript library
 
-Zero is a minimalist JavaScript library for modern browsers with a
-largely jQuery-compatible API. If you use jQuery or Zepto, you already know how to use Zero.
+Zero is a minimalist JavaScript library for modern browsers with a largely jQuery-compatible API.
+If you use jQuery or Zepto.js, you already know how to use Zero.
 
 Zero began as a fork from Zepto.js but has had its internals restructured to be compatible with all modern browsers.
 
@@ -42,10 +42,10 @@ This contains all the modules that are ticked in the Zero modules section below.
 
 ```html
 <!-- Uncompressed -->
-<script type="text/javascript" src="//cdn.jsdelivr.net/zero.js/1.0.0/zero.js"></script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/zero.js/1.1.0/zero.js"></script>
 
 <!-- Minified -->
-<script type="text/javascript" src="//cdn.jsdelivr.net/zero.js/1.0.0/zero.min.js"></script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/zero.js/1.1.0/zero.min.js"></script>
 ```
 
 ## Zero modules
@@ -89,6 +89,11 @@ Zero modules are individual files in the "src/" directory.
     <th><a href="https://github.com/charsleysa/zero/blob/master/src/ajax.js#files">ajax</a></th>
     <td>✔</td>
     <td>XMLHttpRequest Level 2 functionality</td>
+  </tr>
+  <tr>
+    <th><a href="https://github.com/charsleysa/zero/blob/master/src/ajax-xhr1.js#files">ajax-xhr1</a></th>
+    <td></td>
+    <td>XMLHttpRequest Level 1 functionality (To support PhantomJS lower than version 2.0)</td>
   </tr>
   <tr>
     <th><a href="https://github.com/charsleysa/zero/blob/master/src/form.js#files">form</a></th>
