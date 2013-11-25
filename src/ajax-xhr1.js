@@ -203,7 +203,7 @@
 
         xhr.onreadystatechange = function(){
             if (xhr.readyState == 4) {
-                xhr.onreadystatechange = empty;
+                xhr.onreadystatechange = empty
                 clearTimeout(abortTimeout)
                 var result, error = false
                 if ((xhr.status >= 200 && xhr.status < 300) || xhr.status == 304 || (xhr.status == 0 && protocol == 'file:')) {

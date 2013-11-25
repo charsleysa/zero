@@ -29,7 +29,21 @@ var Zero = (function() {
         class2type = {},
         toString = class2type.toString,
         uniq,
-        tempParent = document.createElement('div')
+        tempParent = document.createElement('div'),
+        propMap = {
+            'tabindex': 'tabIndex',
+            'readonly': 'readOnly',
+            'for': 'htmlFor',
+            'class': 'className',
+            'maxlength': 'maxLength',
+            'cellspacing': 'cellSpacing',
+            'cellpadding': 'cellPadding',
+            'rowspan': 'rowSpan',
+            'colspan': 'colSpan',
+            'usemap': 'useMap',
+            'frameborder': 'frameBorder',
+            'contenteditable': 'contentEditable'
+        }
 
     // getComputedStyle shouldn't freak out when called
     // without a valid element as argument
@@ -271,6 +285,7 @@ var Zero = (function() {
     // "null"    => null
     // "42"        => 42
     // "42.5"    => 42.5
+    // "08"    => "08"
     // JSON        => parse if valid
     // String    => self
     function deserializeValue(value) {
@@ -280,7 +295,7 @@ var Zero = (function() {
                 value == "true" ||
                 ( value == "false" ? false :
                     value == "null" ? null :
-                    !isNaN(num = Number(value)) ? num :
+                    !isNaN(num = Number(value)) && (num+'') === value ? num :
                     /^[\[\{]/.test(value) ? $.parseJSON(value) :
                     value )
                 : value
@@ -608,6 +623,7 @@ var Zero = (function() {
             return this.each(function(){ this.nodeType === 1 && setAttribute(this, name) })
         },
         prop: function(name, value){
+            name = propMap[name] || name
             return (value === undefined) ?
                 (this[0] && this[0][name]) :
                 this.each(function(idx){
@@ -685,11 +701,13 @@ var Zero = (function() {
             return element ? this.indexOf($(element).get(0)) : this.parent().children().indexOf(this[0])
         },
         hasClass: function(name){
+            if (!name) return false
             return arr.some.call(this, function(el){
                 return this.test(className(el))
             }, classRE(name))
         },
         addClass: function(name){
+            if (!name) return this
             return this.each(function(idx){
                 classList = []
                 var cls = className(this), newName = funcArg(this, name, idx, cls)
@@ -710,6 +728,7 @@ var Zero = (function() {
             })
         },
         toggleClass: function(name, when){
+            if (!name) return this
             return this.each(function(idx){
                 var $this = $(this), names = funcArg(this, name, idx, className(this))
                 names.split(/\s+/g).forEach(function(klass){
@@ -725,6 +744,15 @@ var Zero = (function() {
             return this.each(hasScrollTop ?
                 function(){ this.scrollTop = value } :
                 function(){ this.scrollTo(this.scrollX, value) })
+        },
+        scrollLeft: function(value){
+            if (!this.length) return
+            var hasScrollLeft = 'scrollLeft' in this[0]
+            if (value === undefined) return hasScrollLeft ? this[0].scrollLeft : this[0].pageXOffset
+            return this.each(hasScrollLeft ?
+                function(){ this.scrollLeft = value } :
+                function(){ this.scrollTo(value, this.scrollY) }
+                )
         },
         position: function() {
             if (!this.length) return
