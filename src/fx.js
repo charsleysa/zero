@@ -57,8 +57,7 @@
 
     $.fn.anim = function(properties, duration, ease, callback, delay){
         var key, cssValues = {}, cssProperties, transforms = '',
-            that = this, wrappedCallback, endEvent = $.fx.transitionEnd
-            fired = false
+            that = this, wrappedCallback, endEvent = $.fx.transitionEnd, fired = false
 
         if (duration === undefined) duration = 0.4
         if (delay === undefined) delay = $.fx.speeds._default / 1000

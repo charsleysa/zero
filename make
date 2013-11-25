@@ -3,7 +3,7 @@ require 'shelljs/make'
 fs = require 'fs'
 os = require 'os'
 
-version   = '1.1.10'
+version   = '1.1.11'
 zero_js  = 'dist/zero.js'
 zero_min = 'dist/zero.min.js'
 zero_gz  = 'dist/zero.min.gz'

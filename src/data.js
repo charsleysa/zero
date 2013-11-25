@@ -5,7 +5,7 @@
 // The following code is heavily inspired by jQuery's $.fn.data()
 
 ;(function($) {
-    var data = {}, dataAttr = $.fn.data, camelize = $.camelCase,
+    var dataAttr = $.fn.data, camelize = $.camelCase,
         exp = $.expando = 'Zero' + (+new Date())
 
     // Get value from node:
@@ -13,7 +13,7 @@
     // 2. then try camelized key,
     // 3. fall back to reading "data-*" attribute.
     function getData(node, name) {
-        var id = node[exp], store = id && data[id]
+        var store = exp && node[exp]
         if (name === undefined) return store || setData(node)
         else {
             if (store) {
@@ -27,8 +27,7 @@
 
     // Store value under camelized key on node
     function setData(node, name, value) {
-        var id = node[exp] || (node[exp] = ++$.uuid),
-            store = data[id] || (data[id] = attributeData(node))
+        var store = node[exp] || (node[exp] = attributeData(node))
         if (name !== undefined) store[camelize(name)] = value
         return store
     }
@@ -60,7 +59,7 @@
     $.fn.removeData = function(names) {
         if (typeof names == 'string') names = names.split(/\s+/)
         return this.each(function(){
-            var id = this[exp], store = id && data[id]
+            var store = exp && this[exp]
             if (store) $.each(names || store, function(key){
                 delete store[names ? camelize(this) : key]
             })
