@@ -2719,7 +2719,7 @@
                 var event = $.Event('click')
                 $('#link_that_will_be_prevented').trigger(event)
 
-                t.assertTrue(event.isDefaultPrevented())
+                t.assertFalse(event.isDefaultPrevented())
 
                 t.pause()
                 setTimeout(function(){

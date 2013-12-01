@@ -192,7 +192,7 @@
         var $this = this
         if (event && !isString(event)) {
             $.each(event, function(type, fn){
-            $this.off(type, selector, fn)
+                $this.off(type, selector, fn)
             })
             return $this
         }

@@ -98,7 +98,7 @@
 
         //HACK: this is a temporary fix for lack of support for the json responseType
         zeroXHR.on('load', function(){
-            if (settings.responseType == 'json'){
+            if (settings.responseType == 'json' && !$.isPlainObject(this.response)){
                 this.response2 = -1
                 try {
                     this.response2 = blankRE.test(this.response) ? null : JSON.parse(this.response)
