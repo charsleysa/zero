@@ -74,6 +74,7 @@ var Zero = (function() {
     }
     function isArray(value) { return value instanceof Array }
     function likeArray(obj) { return typeof obj.length == 'number' }
+    function isString(obj) { return typeof obj == 'string' }
 
     function compact(array) { return filter.call(array, function(item){ return item != null }) }
     function flatten(array) { return array.length > 0 ? arr.concat.apply([], array) : array }
@@ -131,7 +132,7 @@ var Zero = (function() {
     }
 
     $.matches = function(element, selector) {
-        if (!element || element.nodeType !== 1) return false
+        if (!selector || !element || element.nodeType !== 1) return false
         var matchesSelector = element.webkitMatchesSelector || element.mozMatchesSelector || element.oMatchesSelector || element.msMatchesSelector || element.matchesSelector
         if (matchesSelector) return matchesSelector.call(element, selector)
         // fall back to performing a selector:
@@ -295,7 +296,7 @@ var Zero = (function() {
                 value == "true" ||
                 ( value == "false" ? false :
                     value == "null" ? null :
-                    !isNaN(num = Number(value)) && (num+'') === value ? num :
+                    !/^0/.test(value) && !isNaN(num = Number(value)) ? num :
                     /^[\[\{]/.test(value) ? $.parseJSON(value) :
                     value )
                 : value
@@ -309,6 +310,7 @@ var Zero = (function() {
     $.isWindow = isWindow
     $.isArray = isArray
     $.isPlainObject = isPlainObject
+    $.isString = isString
 
     $.isEmptyObject = function(obj) {
         var name

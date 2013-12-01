@@ -282,6 +282,12 @@
         var globalVarSetFromReady2 = ""
         $(function(){ globalVarSetFromReady2 = 'hi!' })
 
+        var globalVarSetFromReady3 = ""
+        $(document).on('ready', function(){ globalVarSetFromReady3 = 'hi!' })
+
+        var globalVarSetFromReady4 = ""
+        $(document).on('foo ready bar', function(){ globalVarSetFromReady4 = 'hi!' })
+
         Evidence.Assertions.assertSame = function(expected, actual, message) {
             var expectedKeyCount = 0, actualKeyCount = 0, key, passed = true
             for (key in expected) expectedKeyCount++
@@ -723,6 +729,8 @@
             testReady: function(t){
                 t.assertEqual('hi!', globalVarSetFromReady)
                 t.assertEqual('hi!', globalVarSetFromReady2)
+                t.assertEqual('hi!', globalVarSetFromReady3)
+                t.assertEqual('hi!', globalVarSetFromReady4)
             },
 
             testNext: function(t){
@@ -1757,6 +1765,9 @@
 
                 t.assertIdentical("08",
                 $('<div data-notnum=08 />').data('notnum'))
+
+                t.assertIdentical(111111111111111111111111111111111,
+                    $('<div data-bignum="111111111111111111111111111111111" />').data('bignum'))
             },
 
             testDataBooleanType: function(t){
@@ -2326,17 +2337,25 @@
 
             testDocumentReady: function (t) {
                 // Check that if document is already loaded, ready() immediately executes callback
-                var arg1, arg2, fired = false
+                var arg1, arg2, arg3, arg4, fired = false
                 $(function (Z1) {
                     arg1 = Z1
                     $(document).ready(function (Z2) {
                         arg2 = Z2
-                        fired = true
+                        $(document).on('ready', function (Z3) {
+                            arg3 = Z3
+                            $(document).on('foo ready bar', function (Z4) {
+                                arg4 = Z4
+                                fired = true
+                            })
+                        })
                     })
                 })
                 t.assertTrue(fired)
                 t.assertIdentical(Zero, arg1)
                 t.assertIdentical(Zero, arg2)
+                t.assertIdentical(Zero, arg3)
+                t.assertIdentical(Zero, arg4)
             },
 
             testSlice: function (t) {
@@ -2428,13 +2447,19 @@
                 t.assertEqualCollection($('#empty_test'), context)
             },
 
-            testBindWithCustomData: function(t) {
-                var counter = 0
-                var handler = function(ev,customData) { counter = customData.counter }
+            testBindWithCustomArgument: function(t) {
+                var data, numArgs, counter = 0,
+                    handler = function(ev, arg) {
+                        numArgs = arguments.length,
+                        data = ev.data
+                        counter = arg.counter
+                    }
 
                 $('#some_element').bind('custom', handler)
                 $('#some_element').trigger('custom', { counter: 10 })
                 t.assertEqual(10, counter)
+                t.assertEqual(2, numArgs)
+                t.assertUndefined(data)
             },
 
             testBindPreventDefault: function (t) {
@@ -2488,10 +2513,11 @@
             },
 
             testTriggerEventObject: function(t){
-                var counter = 0,
-                        customEventKey = 0
+                var data, counter = 0,
+                    customEventKey = 0
 
                 var handler = function(ev,customData) {
+                    data = ev.data
                     counter = customData.counter
                     customEventKey = ev.customKey
                 }
@@ -2503,6 +2529,7 @@
 
                 t.assertEqual(10, counter)
                 t.assertEqual(20, customEventKey)
+                t.assertUndefined(data)
             },
 
             testTriggerEventCancelled: function(t){
@@ -2511,7 +2538,6 @@
                     defaultPrevented = false,
                     isDefaultPrevented = false
 
-                t.refute(event.defaultPrevented)
                 t.refute(event.isDefaultPrevented())
 
                 element.bind('custom', function(e){
@@ -2522,15 +2548,7 @@
 
                 element.trigger(event)
 
-                // FIXME: on IE10 the following tests fail because, well,
-                // because IE is a bag of dicks by changing the value of these
-                // variables back to their default states after dispatchEvent
-                // returns. (This works fine on other browsers.)
-                // For the bug and details see
-                // http://connect.microsoft.com/IE/feedback/details/790389/event-defaultprevented-returns-false-after-preventdefault-was-called
-                // t.assertTrue(event.defaultPrevented)
-                // t.assertTrue(event.isDefaultPrevented())
-
+                t.assertTrue(event.isDefaultPrevented())
                 t.assertTrue(defaultPrevented)
                 t.assertTrue(isDefaultPrevented)
             },
@@ -2683,14 +2701,12 @@
                 var event = $.Event('click')
                 $('#link_that_will_be_prevented').trigger(event)
 
-                // IE10 resets this property after dispatchEvent returns.
-                // Let's test if (as expected) there's nothing loaded into the iframe.
-                // t.assertTrue(event.defaultPrevented)
+                t.assertTrue(event.isDefaultPrevented())
 
                 t.pause()
                 setTimeout(function(){
                     t.resume(function(){
-                        var text = $('#link_target_iframe').get(0).contentDocument.body.innerText
+                        var text = $('#link_target_iframe').get(0).contentDocument.body.textContent
                         t.assert(!text.match(/Hello from iframe/))
                     })
                 }, 500)
@@ -2703,14 +2719,12 @@
                 var event = $.Event('click')
                 $('#link_that_will_be_prevented').trigger(event)
 
-                // IE10 resets this property after dispatchEvent returns.
-                // Let's test if (as expected) there is something loaded into the iframe.
-                // t.assertFalse(event.defaultPrevented)
+                t.assertTrue(event.isDefaultPrevented())
 
                 t.pause()
                 setTimeout(function(){
                     t.resume(function(){
-                        var text = $('#link_target_iframe').get(0).contentDocument.body.innerText
+                        var text = $('#link_target_iframe').get(0).contentDocument.body.textContent
                         t.assert(text.match(/Hello from iframe/))
                     })
                 }, 500)
@@ -2720,7 +2734,7 @@
                 var counter = 0, received, el = $('p').first(),
                     eventData = {
                         click: function(){ counter++ },
-                        custom: function(e, data){ received = data }
+                        custom: function(e, arg){ received = arg }
                     }
 
                 $(document.body).delegate('p', eventData)
@@ -2740,11 +2754,11 @@
                 t.assertEqual('boo', received)
             },
 
-            testDelegateWithCustomData: function(t) {
+            testDelegateWithCustomArgument: function(t) {
                 var received
-                $(document).delegate('#some_element', 'custom', function(e, data, more){ received = data + more })
-                $('p').delegate('span.yay', 'custom', function(e, data){ received = data })
-                $(document).delegate('p', 'custom', function(e, data){ received = data })
+                $(document).delegate('#some_element', 'custom', function(e, arg, more){ received = arg + more })
+                $('p').delegate('span.yay', 'custom', function(e, arg){ received = arg })
+                $(document).delegate('p', 'custom', function(e, arg){ received = arg })
 
                 $('#some_element').trigger('custom', 'one')
                 t.assertEqual('oneundefined', received)
@@ -2878,16 +2892,13 @@
             },
 
             testOne: function(t){
-                var counter = 0, context, received, el = $('#some_element'),
-                    isDefaultPrevented = false, defaultPrevented = false
-                $(document.body).one('click', function(e, data, more){
+                var counter = 0, context, received, el = $('#some_element')
+                $(document.body).one('click', function(e, arg, more){
                     context = this
                     counter++
-                    received = data + more
+                    received = arg + more
                     t.assertIn('preventDefault', e)
                     e.preventDefault()
-                    defaultPrevented = e.defaultPrevented
-                    isDefaultPrevented = e.isDefaultPrevented()
                 })
 
                 var evt = $.Event('click')
@@ -2895,8 +2906,7 @@
                 t.assertEqual(1, counter)
                 t.assertEqual('onetwo', received)
                 t.assertIdentical(document.body, context)
-                t.assertTrue(defaultPrevented)
-                t.assertTrue(isDefaultPrevented)
+                t.assertTrue(evt.isDefaultPrevented())
 
                 el.trigger('click')
                 t.assertEqual(1, counter, "the event handler didn't unbind itself")
