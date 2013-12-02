@@ -61,8 +61,10 @@ var Zero = (function() {
     }
 
     function type(obj) {
-        return obj == null ? String(obj) :
-            class2type[toString.call(obj)] || "object"
+        return obj == null ? obj + "" :
+            typeof obj === "object" || typeof obj === "function" ?
+                class2type[toString.call(obj)] || "object" :
+                typeof obj
     }
 
     function isFunction(value)  { return type(value) == "function" }
@@ -73,8 +75,14 @@ var Zero = (function() {
         return isObject(obj) && !isWindow(obj) && Object.getPrototypeOf(obj) == Object.prototype
     }
     function isArray(value) { return value instanceof Array }
-    function likeArray(obj) { return typeof obj.length == 'number' }
+    function isArraylike(obj) {
+        var length = obj.length, objectType = type(obj)
+        return objectType === "function" || isWindow(obj) ? false :
+            isNumber(obj.nodeType) ? false :
+                objectType === "array" || length === 0 || type(length) === "number" && length > 0 && (length - 1) in obj
+    }
     function isString(obj) { return typeof obj == 'string' }
+    function isNumber(n) { return !isNaN(parseFloat(n)) && isFinite(n) }
 
     function compact(array) { return filter.call(array, function(item){ return item != null }) }
     function flatten(array) { return array.length > 0 ? arr.concat.apply([], array) : array }
@@ -197,18 +205,19 @@ var Zero = (function() {
             else if (context !== undefined) return $(context).find(selector)
             // And last but no least, if it's a CSS selector, use it to select nodes.
             else dom = $.qsa(document, selector)
+            // Check to make sure that dom is array like
+            dom = isArraylike(dom) ? dom : [dom]
         }
         // If a function is given, call it when the DOM is ready
         else if (isFunction(selector)) return $(document).ready(selector)
         // If a Zero collection is given, just return it
         else if ($.isZ(selector)) return selector
-        else if (isArray(selector)) dom = selector
+        else if (isArraylike(selector)) dom = selector
         // Wrap DOM nodes.
         else if (isObject(selector)) dom = [selector], selector = null
         else return this
 
         dom = dom || []
-        dom = isArray(dom) ? dom : [dom]
         $.merge(this, dom)
         this.selector = selector || ''
     }
@@ -309,8 +318,10 @@ var Zero = (function() {
     $.isFunction = isFunction
     $.isWindow = isWindow
     $.isArray = isArray
+    $.isArraylike = isArraylike
     $.isPlainObject = isPlainObject
     $.isString = isString
+    $.isNumber = isNumber
 
     $.isEmptyObject = function(obj) {
         var name
@@ -334,7 +345,7 @@ var Zero = (function() {
 
     $.map = function(elements, callback){
         var value, values = [], i, key
-        if (likeArray(elements))
+        if (isArraylike(elements))
             for (i = 0; i < elements.length; i++) {
                 value = callback(elements[i], i)
                 if (value != null) values.push(value)
@@ -349,7 +360,7 @@ var Zero = (function() {
 
     $.each = function(elements, callback){
         var i, key
-        if (likeArray(elements)) {
+        if (isArraylike(elements)) {
             for (i = 0; i < elements.length; i++)
                 if (callback.call(elements[i], i, elements[i]) === false) return elements
         } else {
@@ -379,7 +390,7 @@ var Zero = (function() {
     if (window.JSON) $.parseJSON = JSON.parse
 
     // Populate the class2type map
-    $.each("Boolean Number String Function Array Date RegExp Object Error".split(" "), function(i, name) {
+    $.each("Boolean Number String Function Array Date RegExp Object Error NodeList".split(" "), function(i, name) {
         class2type[ "[object " + name + "]" ] = name.toLowerCase()
     })
 
@@ -457,7 +468,7 @@ var Zero = (function() {
                 })
             else {
                 var excludes = typeof selector == 'string' ? this.filter(selector) :
-                    (likeArray(selector) && isFunction(selector.item)) ? slice.call(selector) : $(selector)
+                    (isArraylike(selector) && isFunction(selector.item)) ? slice.call(selector) : $(selector)
                 this.forEach(function(el){
                     if (excludes.indexOf(el) < 0) nodes.push(el)
                 })
@@ -600,7 +611,7 @@ var Zero = (function() {
                 (this.length > 0 ? this[0].innerHTML : null) :
                 this.each(function(idx){
                     var originHtml = this.innerHTML
-                    $(this).empty().append( funcArg(this, html, idx, originHtml) )
+                    this.innerHTML = funcArg(this, html, idx, originHtml)
                 })
         },
         text: function(text){

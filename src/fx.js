@@ -102,9 +102,9 @@
             // transitionEnd is not always firing on older Android phones
             // so make sure it gets fired
             setTimeout(function(){
-            if (fired) return
+                if (fired) return
                 wrappedCallback.call(that)
-            }, (duration * 1000) + 25)
+            }, (duration * 1000) + 500)
         }
 
         // trigger page reflow so new elements can animate
@@ -114,7 +114,7 @@
 
         if (duration <= 0) setTimeout(function() {
             wrappedCallback.call(that)
-        }, duration * 1000)
+        }, 0)
 
         return this
     }

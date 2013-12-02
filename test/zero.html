@@ -2107,14 +2107,14 @@
                 }
             },
 
-            testHtmlEval: function (t) {
+            testHtmlNonEval: function (t) {
                 window.someGlobalVariable = 0
                 try {
                     $('<div>').appendTo('#fixtures').html(
                         '<div><b id="newByHtml">Hi</b>' +
                         '<\script>this.someGlobalVariable += $("#newByHtml").size()<\/script></div>'
                     )
-                    t.assertIdentical(1, window.someGlobalVariable)
+                    t.assertIdentical(0, window.someGlobalVariable)
                 } finally {
                     delete window.someGlobalVariable
                 }

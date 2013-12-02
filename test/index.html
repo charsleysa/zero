@@ -1,45 +1,55 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-  <link rel="stylesheet" href="test.css">
-  <title>Zero tests</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <link rel="stylesheet" href="test.css">
+    <title>Zero tests</title>
 </head>
 <body>
-  <h1>Zero tests</h1>
-  <p>
-    This file is provided for manual testing. If there's a test failure,
-    please report the user agent:
-    <script>document.write(navigator.userAgent)</script>
-  </p>
-  <p>
-    To start a test, click or tap it and scroll down to see the results.
-    Functional tests may require manual interaction.
-  </p>
+    <h1>Zero tests</h1>
+    <p>
+        This file is provided for manual testing. If there's a test failure,
+        please report the user agent:
+        <script>document.write(navigator.userAgent)</script>
+    </p>
+    <p>
+        The test server may be started by running npm start.
+        To access the test server from your device enter the following url:
+        http://[your-device-ip]/test/
+    </p>
+    <p>
+        To start a test, click or tap it and scroll down to see the results.
+        Functional tests may require manual interaction.
+    </p>
 
-  <h2>Default modules</h2>
-  <ul>
-    <li><a href="zero.html" target="test">zero</a> (core module, test this first!)</li>
-    <li><a href="detect.html" target="test">detect</a></li>
-    <li><a href="event.html" target="test">event</a></li>
-    <li><a href="ajax.html" target="test">ajax</a> (will fail unless running from the test server.)</li>
-    <li><a href="form.html" target="test">form</a></li>
-    <li><a href="fx.html" target="test">fx</a></li>
-  </ul>
+    <h2>Default modules</h2>
+    <ul>
+        <li><a href="zero.html">zero</a> (core module, test this first!)</li>
+        <li><a href="event.html">event</a></li>
+        <li><a href="ajax.html">ajax</a> (will fail unless running from the test server.)</li>
+        <li><a href="form.html">form</a></li>
+        <li><a href="fx.html">fx</a></li>
+        <li><a href="callbacks.html">callbacks</a></li>
+        <li><a href="deferred.html">deferred</a></li>
+    </ul>
 
-  <h2>Other modules</h2>
-  <ul>
-    <li><a href="data.html" target="test">data</a></li>
-    <li><a href="assets_functional.html" target="test">assets (functional)</a></li>
-    <li><a href="fx_functional.html" target="test">fx (functional)</a></li>
-    <li><a href="selector.html" target="test">selector</a></li>
-    <li><a href="stack.html" target="test">stack</a></li>
-    <li><a href="touch.html" target="test">touch</a></li>
-    <li><a href="touch_functional.html" target="test">touch (functional)</a></li>
-    <li><a href="touchcancel_functional.html" target="test">touchcancel (functional)</a></li>
-  </ul>
+    <h2>Other modules</h2>
+    <ul>
+        <li><a href="ajax-xhr1.html">ajax-xhr1</a> (will fail unless running from the test server.)</li>
+        <li><a href="data.html">data</a></li>
+        <li><a href="detect.html">detect</a></li>
+        <li><a href="selector.html">selector</a></li>
+        <li><a href="stack.html">stack</a></li>
+        <li><a href="touch.html">touch</a></li>
+    </ul>
 
-  <iframe name="test" width="100%" height="200"></iframe>
+    <h2>Functional tests</h2>
+    <ul>
+        <li><a href="assets_functional.html">assets (functional)</a></li>
+        <li><a href="fx_functional.html">fx (functional)</a></li>
+        <li><a href="touch_functional.html">touch (functional)</a></li>
+        <li><a href="touchcancel_functional.html">touchcancel (functional)</a></li>
+    </ul>
 </body>
 </html>

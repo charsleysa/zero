@@ -1,6 +1,6 @@
 //     Zero.js
 //     (c) 2013 Stefan Andres Charsley
-//      Zero.js may be freely distributed under the MIT license.
+//     Zero.js may be freely distributed under the MIT license.
 
 ;(function($){
     $.Deferred = function(func) {

@@ -69,7 +69,7 @@ Zero modules are individual files in the "src/" directory.
   </tr>
   <tr>
     <th><a href="src/detect.js#files">detect</a></th>
-    <td>✔</td>
+    <td></td>
     <td>Provides <code>$.os</code> and <code>$.browser</code> information</td>
   </tr>
   <tr>
@@ -122,8 +122,7 @@ Zero modules are individual files in the "src/" directory.
     <th><a href="src/data.js#files">data</a></th>
     <td></td>
     <td>
-      A full-blown <code>data()</code> method, capable of storing arbitrary
-      objects in memory.
+      A full-blown <code>data()</code> method that stores data directly on to objects in memory.
     </td>
   </tr>
   <tr>
@@ -157,8 +156,8 @@ Get in touch:
 ### Write documentation
 
 Zero currently has no documentation available.
-Since the API is based off Zepto.js you can use most of their documentation to learn how to use Zero.
-Please note that most of the API's marked deprecated in the Zepto.js documentation are not available in Zero.
+Since the API is based off Zepto.js and jQuery, you can use most of their documentation to learn how to use Zero.
+Please note that most of the API's marked deprecated in the Zepto.js documentation may not be available in Zero.
 
 ### Report a bug
 
