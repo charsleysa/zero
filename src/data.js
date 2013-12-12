@@ -4,7 +4,7 @@
 
 // The following code is heavily inspired by jQuery's $.fn.data()
 
-;(function($) {
+;(function($){
     var dataAttr = $.fn.data, camelize = $.camelCase,
         exp = $.expando = 'Zero' + (+new Date())
 

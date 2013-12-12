@@ -26,6 +26,7 @@ var Zero = (function() {
         tagIdClassSelectorRE = /^(?:#([\w-]+)*|(\w+)|\.([\w-]+))$/,
         tagExpanderRE = /<(?!area|br|col|embed|hr|img|input|link|meta|param)(([\w:]+)[^>]*)\/>/ig,
         rootNodeRE = /^(?:body|html)$/i,
+        capitalRE = /([A-Z])/g,
         class2type = {},
         toString = class2type.toString,
         uniq,
@@ -644,13 +645,13 @@ var Zero = (function() {
                 })
         },
         data: function(name, value){
-            var data = this.attr('data-' + dasherize(name), value)
+            var data = this.attr('data-' + name.replace(capitalRE, '-$1').toLowerCase(), value)
             return data !== null ? deserializeValue(data) : undefined
         },
         val: function(value){
             return arguments.length === 0 ?
                 (this[0] && (this[0].multiple ?
-                     $(this[0]).find('option').filter(function(o){ return this.selected }).pluck('value') :
+                     $(this[0]).find('option').filter(function(){ return this.selected }).pluck('value') :
                      this[0].value)
                 ) :
                 this.each(function(idx){

@@ -62,6 +62,7 @@
             var callback  = delegator || fn
             handler.proxy = function(e){
                 e = compatible(e)
+                if (e.isImmediatePropagationStopped()) return
                 e.data = data
                 var result = callback.apply(element, e._args == undefined ? [e] : [e].concat(e._args))
                 if (result === false) e.preventDefault(), e.stopPropagation()
@@ -109,28 +110,28 @@
     }
 
     var returnTrue = function(){return true},
-            returnFalse = function(){return false},
-            ignoreProperties = /^([A-Z]|returnValue$|layer[XY]$)/,
-            eventMethods = {
-                preventDefault: 'isDefaultPrevented',
-                stopImmediatePropagation: 'isImmediatePropagationStopped',
-                stopPropagation: 'isPropagationStopped'
-            }
+        returnFalse = function(){return false},
+        ignoreProperties = /^([A-Z]|returnValue$|layer[XY]$)/,
+        eventMethods = {
+            preventDefault: 'isDefaultPrevented',
+            stopImmediatePropagation: 'isImmediatePropagationStopped',
+            stopPropagation: 'isPropagationStopped'
+        }
     function compatible(event, source) {
         if (source || !event.isDefaultPrevented) {
             source || (source = event)
 
             $.each(eventMethods, function(name, predicate) {
                 var sourceMethod = source[name]
-                if (!sourceMethod) return
                 event[name] = function(){
                     this[predicate] = returnTrue
-                    return sourceMethod.apply(source, arguments)
+                    return sourceMethod && sourceMethod.apply(source, arguments)
                 }
                 event[predicate] = returnFalse
             })
             if (source.defaultPrevented !== undefined ? source.defaultPrevented :
-                source.getPreventDefault && source.getPreventDefault())
+                'returnValue' in source ? source.returnValue === false :
+                    source.getPreventDefault && source.getPreventDefault())
             event.isDefaultPrevented = returnTrue
         }
         return event
@@ -160,10 +161,12 @@
             return $this
         }
  
-        if (!isString(selector) && !isFunction(callback))
+        if (!isString(selector) && !isFunction(callback) && callback !== false)
             callback = data, data = selector, selector = undefined
-        if (isFunction(data))
+        if (isFunction(data) || data === false)
             callback = data, data = undefined
+
+        if (callback === false) callback = returnFalse
  
         return $this.each(function(_, element){
             if (one) autoRemove = function(e){
@@ -173,7 +176,7 @@
  
             if (selector) delegator = function(e){
                 var evt, match = $(e.target).closest(selector, element).get(0)
-                if (match) {
+                if (match && match !== element) {
                     evt = $.extend(createProxy(e), {currentTarget: match, liveFired: element})
                     return (autoRemove || callback).apply(match, [evt].concat(slice.call(arguments, 1)))
                 }
