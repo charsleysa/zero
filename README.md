@@ -173,17 +173,23 @@ You will need to install [PhantomJS][phantomjs].
 
 If you use Node.js it will automatically be installed as a dependancy when you run the `npm install` command.
 
-To run the test suite, these are all equivalent:
+To run the automated tests:
 
 ~~~ sh
 $ npm test
-$ ./make test
-$ script/test
 ~~~
 
-To manually run tests (all except for the ajax and ajax-xhr1 modules) on a device,
-you can serve the whole Zero folder on a web server and open
-`test/index.html` in the device's browser.
+
+To run a test server, which you can hit with your browsers and devices:
+
+~~~ sh
+$ npm start
+~~~
+
+Go to `http://your-ip-address:3000/` on your browser and follow the
+instructions. For your convenience test failures and exceptions will be
+reported to the the console you started the test server in (as well as
+the browser console if available).
 
   [master]: https://github.com/charsleysa/zero/commits/master
   [issues]: https://github.com/charsleysa/zero/issues
