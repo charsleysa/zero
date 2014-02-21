@@ -44,7 +44,8 @@ var Zero = (function() {
             'usemap': 'useMap',
             'frameborder': 'frameBorder',
             'contenteditable': 'contentEditable'
-        }
+        },
+        isArray = Array.isArray || function(value){ return value instanceof Array }
 
     // getComputedStyle shouldn't freak out when called
     // without a valid element as argument
@@ -75,7 +76,6 @@ var Zero = (function() {
     function isPlainObject(obj) {
         return isObject(obj) && !isWindow(obj) && Object.getPrototypeOf(obj) == Object.prototype
     }
-    function isArray(value) { return value instanceof Array }
     function isArraylike(obj) {
         var length = obj.length, objectType = type(obj)
         return objectType === "function" || isWindow(obj) ? false :
@@ -540,7 +540,7 @@ var Zero = (function() {
             }), selector)
         },
         empty: function(){
-            return this.each(function(){ this.innerHTML = '' })
+            return this.each(function(){ while(this.firstChild) this.removeChild(this.firstChild) })
         },
         // `pluck` is borrowed from Prototype.js
         pluck: function(property){
@@ -768,33 +768,33 @@ var Zero = (function() {
                 function(){ this.scrollTo(value, this.scrollY) }
                 )
         },
-        position: function() {
+        position: function(){
             if (!this.length) return
 
             var elem = this[0],
                 // Get *real* offsetParent
                 offsetParent = this.offsetParent(),
                 // Get correct offsets
-                offset             = this.offset(),
+                offset       = this.offset(),
                 parentOffset = rootNodeRE.test(offsetParent.get(0).nodeName) ? { top: 0, left: 0 } : offsetParent.offset()
 
             // Subtract element margins
             // note: when an element has margin: auto the offsetLeft and marginLeft
             // are the same in Safari causing offset.left to incorrectly be 0
-            offset.top    -= parseFloat( $(elem).css('margin-top') ) || 0
+            offset.top  -= parseFloat( $(elem).css('margin-top') ) || 0
             offset.left -= parseFloat( $(elem).css('margin-left') ) || 0
 
             // Add offsetParent borders
-            parentOffset.top    += parseFloat( $(offsetParent.get(0)).css('border-top-width') ) || 0
+            parentOffset.top  += parseFloat( $(offsetParent.get(0)).css('border-top-width') ) || 0
             parentOffset.left += parseFloat( $(offsetParent.get(0)).css('border-left-width') ) || 0
 
             // Subtract the two offsets
             return {
-                top:    offset.top    - parentOffset.top,
+                top:  offset.top  - parentOffset.top,
                 left: offset.left - parentOffset.left
             }
         },
-        offsetParent: function() {
+        offsetParent: function(){
             return this.map(function(){
                 var parent = this.offsetParent || document.body
                 while (parent && !rootNodeRE.test(parent.nodeName) && $(parent).css("position") == "static")
@@ -813,7 +813,7 @@ var Zero = (function() {
             dimension.replace(/./, function(m){ return m[0].toUpperCase() })
 
         $.fn[dimension] = function(value){
-            var offset, el = this[0]
+            var el = this[0]
             if (value === undefined) return isWindow(el) ? el['inner' + dimensionProperty] :
                 isDocument(el) ? el.documentElement['scroll' + dimensionProperty] :
                 parseFloat(this.css(dimension)) || null
@@ -822,7 +822,7 @@ var Zero = (function() {
                 el.css(dimension, funcArg(this, value, idx, el[dimension]()))
             })
         }
-        $.fn["outer" + dimensionProperty] = function(value){
+        $.fn["outer" + dimensionProperty] = function(){
             var offset, el = this[0]
             return isWindow(el) ? el['outer' + dimensionProperty] :
                 isDocument(el) ? el.documentElement['scroll' + dimensionProperty] :
@@ -844,31 +844,43 @@ var Zero = (function() {
             // arguments can be nodes, arrays of nodes, and HTML strings but not Zero objects
             var argType, nodes = $.map(arguments, function(arg) {
                 argType = type(arg)
-                var ret = argType == "object" || argType == "array" || argType == "null" ?
+                var ret = argType == 'object' || argType == 'array' || argType == 'null' || (argType == 'string' && inside) ?
                     arg : $.fragment(arg)
                 return $.isZ(ret) ? $.merge([],ret) : ret
             }),
-            parent, copyByClone = this.length > 1
+            parent, element, copyByClone = this.length > 1, position, count, difference
             if (nodes.length < 1) return this
 
             return this.each(function(_, target){
+                element = target
                 parent = inside ? target : target.parentNode
 
                 // convert all methods to a "before" operation
                 target = operatorIndex == 0 ? target.nextSibling :
-                                 operatorIndex == 1 ? target.firstChild :
-                                 operatorIndex == 2 ? target :
-                                 null
+                         operatorIndex == 1 ? target.firstChild :
+                         operatorIndex == 2 ? target :
+                         null
+                position = operatorIndex == 1 ? 'afterbegin' : 'beforeend'
 
                 nodes.forEach(function(node){
-                    if (copyByClone) node = node.cloneNode(true)
-                    else if (!parent) return $(node).remove()
-
-                    traverseNode(parent.insertBefore(node, target), function(el){
+                    var traverseFunction = function(el){
                         if (el.nodeName != null && el.nodeName.toUpperCase() === 'SCRIPT' &&
-                             (!el.type || el.type === 'text/javascript') && !el.src)
+                                (!el.type || el.type === 'text/javascript') && !el.src)
                             window['eval'].call(window, el.innerHTML)
-                    })
+                    }
+
+                    // If the node is of type string, then use insertAdjacentHTML, otherwise insertBefore
+                    if (type(node) == 'string') {
+                        count = element.childNodes.length
+                        element.insertAdjacentHTML(position, node)
+                        difference = element.childNodes.length - count
+                        for (var i = 0; i < difference; i++) traverseNode(element.childNodes[(operatorIndex == 1 ? i : count + i)], traverseFunction)
+                    } else {
+                        if (copyByClone) node = node.cloneNode(true)
+                        else if (!parent) return $(node).remove()
+
+                        traverseNode(parent.insertBefore(node, target), traverseFunction)
+                    }
                 })
             })
         }

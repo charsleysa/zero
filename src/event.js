@@ -3,7 +3,7 @@
 //     Zero.js may be freely distributed under the MIT license.
 
 ;(function($){
-    var $$ = $.qsa, _zid = 1, undefined,
+    var _zid = 1, undefined,
         slice = Array.prototype.slice,
         isFunction = $.isFunction,
         isString = $.isString,

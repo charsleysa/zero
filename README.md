@@ -5,7 +5,7 @@ If you use jQuery or Zepto.js, you already know how to use Zero.
 
 Zero began as a fork from Zepto.js but has had its internals restructured to be compatible with all modern browsers.
 
-Zero also has performance improvements that surpass that of Zepto.js and in some cases even jQuery 2.
+Zero also has performance improvements while keeping the small size.
 
 Zero.js is licensed under the terms of the MIT License.
 

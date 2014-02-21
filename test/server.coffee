@@ -65,7 +65,8 @@ app.get '/test/jsonpBlah', (req, res) ->
 
 app.get '/test/json', (req, res) ->
   res.set 'Cache-Control', 'no-cache'
-  if /json/.test req.headers['accept']
+  expectedType = req.headers['accept']
+  if expectedType is '*/*' or /json/.test expectedType
     if req.query.invalid
       res.set 'Content-Type', 'application/json'
       res.send 'invalidJSON'
@@ -75,6 +76,12 @@ app.get '/test/json', (req, res) ->
         hello: 'world'
   else
     res.send 400, 'FAIL'
+
+app.post '/test/create', (req, res) ->
+  res.json
+    action: 'created'
+    query: req.query
+    payload: req.body
 
 app.all '/test/slow', (req, res) ->
   setTimeout ->

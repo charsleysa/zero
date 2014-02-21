@@ -3,7 +3,7 @@
 //     Zero.js may be freely distributed under the MIT license.
 
 ;(function($, undefined){
-    var prefix = '', eventPrefix, endEventName, endAnimationName,
+    var prefix = '', eventPrefix,
         vendors = { Webkit: 'webkit', Moz: '', O: 'o', MS: '' },
         document = window.document, testEl = document.createElement('div'),
         supportedTransforms = /^((translate|rotate|scale)(X|Y|Z|3d)?|matrix(3d)?|perspective|skew(X|Y)?)$/i,

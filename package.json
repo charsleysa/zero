@@ -1,6 +1,6 @@
 {
     "name": "zero"
-  , "version": "1.2.0"
+  , "version": "1.2.5"
   , "homepage": "https://github.com/charsleysa/zero"
   , "scripts": {
       "test": "coffee make test"
@@ -18,7 +18,7 @@
     }
   ]
   , "devDependencies": {
-      "uglify-js": "1.2.6"
+      "uglify-js": "2.4.x"
     , "express": "3.1.x"
     , "coffee-script": "1.5.x"
     , "shelljs": "0.1.x"

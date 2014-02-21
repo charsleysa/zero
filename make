@@ -3,7 +3,7 @@ require 'shelljs/make'
 fs = require 'fs'
 os = require 'os'
 
-version   = '1.2.0'
+version   = '1.2.5'
 zero_js  = 'dist/zero.js'
 zero_min = 'dist/zero.min.js'
 zero_gz  = 'dist/zero.min.gz'
@@ -91,7 +91,10 @@ describe_version = ->
 
 minify = (source_code) ->
   uglify = require('uglify-js')
-  ast = uglify.parser.parse(source_code)
-  ast = uglify.uglify.ast_mangle(ast)
-  ast = uglify.uglify.ast_squeeze(ast)
-  uglify.uglify.gen_code(ast)
+  compressor = uglify.Compressor()
+  ast = uglify.parse(source_code)
+  ast.figure_out_scope()
+  ast.compute_char_frequency();
+  ast.mangle_names();
+  ast = ast.transform(compressor)
+  return ast.print_to_string()

@@ -165,7 +165,7 @@
             if (typeof func !== 'function') throw TypeError('Expected func to be of type function.')
             var callback = func
             var context = settings.context
-            $(xhr).on('loadend', function(e){
+            $(xhr).on('loadend', function(){
                 callback.call(context, this, settings)
             })
 
@@ -193,13 +193,13 @@
         
         // If settings.global is set to true then hook in global ajax events
         if (settings.global){
-            zeroXHR.on('beforesend', function(e){
+            zeroXHR.on('beforesend', function(){
                 var event = $.Event('ajaxBeforeSend')
                 $(settings.context || document).trigger(event, [this, settings])
                 return !event.isDefaultPrevented()
             })
 
-            zeroXHR.on('loadstart', function(e){
+            zeroXHR.on('loadstart', function(){
                 $(settings.context || document).trigger($.Event('ajaxStart'), [this, settings])
             })
 
@@ -219,7 +219,7 @@
                 $(settings.context || document).trigger($.Event('ajaxError'), [this, settings, e.type])
             })
 
-            zeroXHR.on('loadend', function(e){
+            zeroXHR.on('loadend', function(){
                 $(settings.context || document).trigger($.Event('ajaxStop'), [this, settings])
             })
         }
@@ -249,26 +249,27 @@
 
     // handle optional data/done arguments
     function parseArguments(url, data, done, responseType) {
-        var hasData = !$.isFunction(data)
+        if ($.isFunction(data)) responseType = done, done = data, data = undefined
+        if (!$.isFunction(done)) responseType = done, done = undefined
         return {
             url: url,
-            data: hasData ? data : undefined,
-            done: !hasData ? data : $.isFunction(done) ? done : undefined,
-            responseType: hasData ? responseType || done : done
+            data: data,
+            done: done,
+            responseType: responseType
         }
     }
 
-    $.get = function (url, data, done, responseType) {
+    $.get = function (/*url, data, done, responseType*/) {
         return $.ajax(parseArguments.apply(null, arguments))
     }
 
-    $.post = function (url, data, done, responseType) {
+    $.post = function (/*url, data, done, responseType*/) {
         var options = parseArguments.apply(null, arguments)
         options.type = 'POST'
         return $.ajax(options)
     }
 
-    $.getJSON = function (url, data, done) {
+    $.getJSON = function (/*url, data, done*/) {
         var options = parseArguments.apply(null, arguments)
         // Currently only supported by Firefox and Chrome dev
         options.responseType = 'json'
@@ -284,7 +285,8 @@
             callback = options.done
         if (parts.length > 1) options.url = parts[0], selector = parts[1]
         options.done = function (response) {
-            self.html(selector ?
+            self.html('')
+            self.append(selector ?
                 $('<div>').html(response.replace(rscript, "")).find(selector) : response)
             callback && callback.apply(self, arguments)
         }
