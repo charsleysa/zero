@@ -230,20 +230,45 @@
                 var maxActive = 0, requestsStarted = 0, requestsCompleted = 0
                 t.assertIdentical(0, $.active, 'initial count mismatch')
                 $(document)
-            .on('ajaxStart', function () {
-                requestsStarted++
-            })
-            .on('ajaxStop', function () {
-                if (++requestsCompleted == 3)
-                    deferredResume(t, function () {
-                        this.assertEqual(3, requestsStarted)
-                        this.assertIdentical(0, $.active)
-                    })
-            })
+                .on('ajaxStart', function () {
+                    requestsStarted++
+                })
+                .on('ajaxStop', function () {
+                    if (++requestsCompleted == 3)
+                        deferredResume(t, function () {
+                            this.assertEqual(3, requestsStarted)
+                            this.assertIdentical(0, $.active)
+                        })
+                })
 
                 t.pause()
                 $.ajax({ url: 'echo' })
                 $.ajax({ url: 'echo' })
+                $.ajax({ url: 'echo' })
+            },
+
+            testAjaxGlobalEventFunctions: function (t) {
+                var maxActive = 0, requestsStarted = 0, requestsCompleted = 0, requestsErrored = 0
+                t.assertIdentical(0, $.active, 'initial count mismatch')
+                $(document)
+                .ajaxStart(function () {
+                    requestsStarted++
+                })
+                .ajaxError(function () {
+                    requestsErrored++
+                })
+                .ajaxStop(function () {
+                    if (++requestsCompleted == 3)
+                        deferredResume(t, function () {
+                            this.assertEqual(1, requestsErrored)
+                            this.assertEqual(3, requestsStarted)
+                            this.assertIdentical(0, $.active)
+                        })
+                })
+
+                t.pause()
+                $.ajax({ url: 'echo' })
+                $.ajax({ url: 'echo-invalid' })
                 $.ajax({ url: 'echo' })
             },
 
@@ -266,13 +291,13 @@
                 resumeOnAjaxError(t)
 
                 var zeroXhr = $.getJSON(
-            'json',
-            t.reg.resumeHandler('done', function (data) {
-                t.assertEqual('world', data.hello)
-                t.assert($.isEmptyObject(data.query))
-                t.assertEqualList('ajaxBeforeSend ajaxStart done ajaxSuccess ajaxStop', t.reg.events())
-            })
-            )
+                    'json',
+                    t.reg.resumeHandler('done', function (data) {
+                        t.assertEqual('world', data.hello)
+                        t.assert($.isEmptyObject(data.query))
+                        t.assertEqualList('ajaxBeforeSend ajaxStart done ajaxSuccess ajaxStop', t.reg.events())
+                    })
+                )
                 t.assertIn('abort', zeroXhr.get(0))
             },
 
@@ -281,12 +306,12 @@
                 resumeOnAjaxError(t)
 
                 $.getJSON(
-            'json', { sample: 'data' },
-            t.reg.resumeHandler('done', function (data) {
-                t.assertEqual('data', data.query.sample)
-            }),
-            'text' // ignored
-            )
+                    'json', { sample: 'data' },
+                    t.reg.resumeHandler('done', function (data) {
+                        t.assertEqual('data', data.query.sample)
+                    }),
+                    'text' // ignored
+                )
             },
 
             testNoCacheParam: function (t) {
@@ -344,16 +369,16 @@
                 t.pause()
                 var testEl = $('#ajax_load')
                 var el = testEl.load(
-            'fixtures/ajax_load_simple.html',
-            t.reg.resumeHandler('done', function (response, statusText, xhr) {
-                t.assertIdentical(testEl, this)
-                t.assertEqual("simple ajax load", response)
-                t.assertEqual('simple ajax load', testEl.html().trim())
-                t.assertEqual('OK', statusText)
-                t.assertIn('abort', xhr)
-                t.assertEqualList('ajaxBeforeSend ajaxStart done ajaxSuccess ajaxStop', t.reg.events())
-            })
-            )
+                    'fixtures/ajax_load_simple.html',
+                    t.reg.resumeHandler('done', function (response, statusText, xhr) {
+                        t.assertIdentical(testEl, this)
+                        t.assertEqual("simple ajax load", response)
+                        t.assertEqual('simple ajax load', testEl.html().trim())
+                        t.assertEqual('OK', statusText)
+                        t.assertIn('abort', xhr)
+                        t.assertEqualList('ajaxBeforeSend ajaxStart done ajaxSuccess ajaxStop', t.reg.events())
+                    })
+                )
                 t.assertIdentical(testEl, el)
             },
 
@@ -361,14 +386,14 @@
                 t.pause()
                 var testEl = $('#ajax_load')
                 testEl.load(
-            'fixtures/ajax_load_selector.html #ajax_load_test_div',
-            t.reg.resumeHandler('done', function () {
-                t.assertEqual(
-                '<div id="ajax_load_test_div">ajax load with selector</div>',
-                testEl.html().trim()
+                    'fixtures/ajax_load_selector.html #ajax_load_test_div',
+                    t.reg.resumeHandler('done', function () {
+                        t.assertEqual(
+                        '<div id="ajax_load_test_div">ajax load with selector</div>',
+                        testEl.html().trim()
+                        )
+                    })
                 )
-            })
-            )
             },
 
             testAjaxLoadWithJavaScript: function (t) {

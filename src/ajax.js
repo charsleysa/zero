@@ -243,7 +243,7 @@
         }
 
         // avoid sending empty string
-        xhr.send(settings.data ? settings.data : null)
+        xhr.send(settings.data || null)
         return zeroXHR
     }
 
@@ -319,4 +319,9 @@
         serialize(params, obj, traditional)
         return params.join('&').replace(/%20/g, '+')
     }
+
+    ;['BeforeSend', 'Start', 'Success', 'Error', 'Stop'].forEach(function(event){
+        var eventName = 'ajax' + event
+        $.fn[eventName] = function(callback){ return this.on(eventName, callback) }
+    })
 })(Zero)

@@ -3,16 +3,18 @@ require 'shelljs/make'
 fs = require 'fs'
 os = require 'os'
 
-version   = '1.2.5'
-zero_js  = 'dist/zero.js'
-zero_min = 'dist/zero.min.js'
-zero_gz  = 'dist/zero.min.gz'
+version    = '1.3.0'
+_zero      = 'zero'
+_zero_big  = 'zero.big'
+_js        = 'dist/{name}.js'
+_min       = 'dist/{name}.min.js'
+_gz        = 'dist/{name}.min.gz'
 
 port = 3999
 root = __dirname + '/'
 
 target.all = ->
-  target[zero_js]()
+  target.dist()
   target.test()
 
 ## TASKS ##
@@ -24,48 +26,52 @@ target.test = ->
   exec command + "phantomjs test/runner.coffee 'http://localhost:#{port}/'", (code) ->
     server.close -> exit(code)
 
-target[zero_js] = ->
-  target.build() unless test('-e', zero_js)
-
-target[zero_min] = ->
-  target.minify() if stale(zero_min, zero_js)
-
-target[zero_gz] = ->
-  target.compress() if stale(zero_gz, zero_min)
-
 target.dist = ->
-  target.build()
-  target.minify()
-  target.compress()
+  name = filename(_zero)
+  modules = env['MODULES'] || 'zero event ajax form fx'
+  target.build(name, modules)
+  target.minify(name)
+  target.compress(name)
+  name = filename(_zero_big)
+  modules = 'zero event ajax assets callbacks data deferred detect form fx fx_methods selector stack touch'
+  target.build(name, modules)
+  target.minify(name)
+  target.compress(name)
 
-target.build = ->
+target.build = (name, modules) ->
   cd __dirname
   mkdir '-p', 'dist'
-  modules = (env['MODULES'] || 'zero event ajax form fx callbacks deferred').split(' ')
+  modules = modules.split(' ')
   module_files = ( "src/#{module}.js" for module in modules )
   intro = "/* Zero #{describe_version()} - #{modules.join(' ')} */\n"
   dist = intro + cat(module_files).replace(/^\/[\/*].*$/mg, '').replace(/\n{3,}/g, "\n\n")
-  dist.to(zero_js)
-  report_size(zero_js)
+  dist.to(name.js)
+  report_size(name.js)
 
-target.minify = ->
-  target.build() unless test('-e', zero_js)
-  zero_code = cat(zero_js)
+target.minify = (name) ->
+  zero_code = cat(name.js)
   intro = zero_code.slice(0, zero_code.indexOf("\n") + 1)
-  (intro + minify(zero_code)).to(zero_min)
-  report_size(zero_min)
+  (intro + minify(zero_code)).to(name.min)
+  report_size(name.min)
 
-target.compress = ->
+target.compress = (name) ->
   gzip = require('zlib').createGzip()
-  inp = fs.createReadStream(zero_min)
-  out = fs.createWriteStream(zero_gz)
+  inp = fs.createReadStream(name.min)
+  out = fs.createWriteStream(name.gz)
   inp.pipe(gzip).pipe(out)
   out.on 'close', ->
-    report_size(zero_gz)
-    factor = fsize(zero_js) / fsize(zero_gz)
+    report_size(name.gz)
+    factor = fsize(name.js) / fsize(name.gz)
     echo "compression factor: #{format_number(factor)}"
 
 ## HELPERS ##
+
+filename = (name) ->
+  file =
+    js: _js.replace(/\{name\}/g, name)
+    min: _min.replace(/\{name\}/g, name)
+    gz: _gz.replace(/\{name\}/g, name)
+  return file
 
 stale = (file, source) ->
   target[source]()

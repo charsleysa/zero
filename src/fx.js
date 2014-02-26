@@ -5,12 +5,18 @@
 ;(function($, undefined){
     var prefix = '', eventPrefix,
         vendors = { Webkit: 'webkit', Moz: '', O: 'o', MS: '' },
+        nonCssAnimations = { scrollTop: true, scrollLeft: true },
         document = window.document, testEl = document.createElement('div'),
         supportedTransforms = /^((translate|rotate|scale)(X|Y|Z|3d)?|matrix(3d)?|perspective|skew(X|Y)?)$/i,
         transform,
         transitionProperty, transitionDuration, transitionTiming, transitionDelay,
         animationName, animationDuration, animationTiming, animationDelay,
-        cssReset = {}
+        cssReset = {},
+        easingFunction = function(percentage) {
+            // acceleration until halfway, then deceleration
+            return percentage < 0.5 ? 4 * percentage * percentage * percentage :
+                (percentage - 1) * (2 * percentage - 2) * (2 * percentage - 2) + 1
+        }
 
     function dasherize(str) { return str.replace(/([a-z])([A-Z])/, '$1-$2').toLowerCase() }
     function normalizeEvent(name) { return eventPrefix ? eventPrefix + name : name.toLowerCase() }
@@ -56,7 +62,7 @@
     }
 
     $.fn.anim = function(properties, duration, ease, callback, delay){
-        var key, cssValues = {}, cssProperties, transforms = '',
+        var key, cssValues = {}, cssProperties, transforms = '', nonCssAnimate = {},
             that = this, wrappedCallback, endEvent = $.fx.transitionEnd, fired = false
 
         if (duration === undefined) duration = 0.4
@@ -73,9 +79,11 @@
         } else {
             cssProperties = []
             // CSS transitions
-            for (key in properties)
+            for (key in properties) {
+                if (nonCssAnimations[key] && $.isNumber(properties[key])) nonCssAnimate[key] = properties[key]
                 if (supportedTransforms.test(key)) transforms += key + '(' + properties[key] + ') '
                 else cssValues[key] = properties[key], cssProperties.push(dasherize(key))
+            }
 
             if (transforms) cssValues[transform] = transforms, cssProperties.push(transform)
             if (duration > 0 && typeof properties === 'object') {
@@ -84,6 +92,22 @@
                 cssValues[transitionDelay] = delay + 's'
                 cssValues[transitionTiming] = (ease || 'linear')
             }
+        }
+
+        for (key in nonCssAnimate) {
+            this.each(function(){
+                var node = $(this), timeLapsed = 0, startLocation = node[key](), endLocation = nonCssAnimate[key],
+                    distance = endLocation - startLocation, position, percentage, durationInMilliseconds = duration * 1000,
+                    intervalFunction = function () {
+                        timeLapsed += 16
+                        percentage = timeLapsed / (durationInMilliseconds || 1)
+                        percentage = (percentage > 1) ? 1 : percentage
+                        position = startLocation + (distance * easingFunction(percentage))
+                        node[key](position)
+                        if (position == endLocation) clearInterval(intervalId)
+                    }
+                var intervalId = setInterval(intervalFunction, 16)
+            })
         }
 
         wrappedCallback = function(event){

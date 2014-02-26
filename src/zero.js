@@ -64,9 +64,8 @@ var Zero = (function() {
 
     function type(obj) {
         return obj == null ? obj + "" :
-            typeof obj === "object" || typeof obj === "function" ?
-                class2type[toString.call(obj)] || "object" :
-                typeof obj
+            typeof obj === "object" || typeof obj === "function" ? class2type[toString.call(obj)] || "object" :
+            typeof obj
     }
 
     function isFunction(value)  { return type(value) == "function" }
@@ -80,12 +79,12 @@ var Zero = (function() {
         var length = obj.length, objectType = type(obj)
         return objectType === "function" || isWindow(obj) ? false :
             isNumber(obj.nodeType) ? false :
-                objectType === "array" || length === 0 || type(length) === "number" && length > 0 && (length - 1) in obj
+            objectType === "array" || length === 0 || type(length) === "number" && length > 0 && (length - 1) in obj
     }
     function isString(obj) { return typeof obj == 'string' }
     function isNumber(n) { return !isNaN(parseFloat(n)) && isFinite(n) }
 
-    function compact(array) { return filter.call(array, function(item){ return item != null }) }
+    /*function compact(array) { return filter.call(array, function(item){ return item != null }) }*/
     function flatten(array) { return array.length > 0 ? arr.concat.apply([], array) : array }
     function camelize(str)  { return str.replace(/-+(.)?/g, function(match, chr){ return chr ? chr.toUpperCase() : '' }) }
     function dasherize(str) {
@@ -684,11 +683,11 @@ var Zero = (function() {
             if (arguments.length < 2) {
                 var element = this[0], computedStyle = getComputedStyle(element, '')
                 if(!element) return
-                if (typeof property == 'string')
+                if (type(property) == 'string')
                     return element.style[camelize(property)] || computedStyle.getPropertyValue(property)
                 else if (isArray(property)) {
                     var props = {}
-                    $.each(isArray(property) ? property: [property], function(_, prop){
+                    $.each(isArray(property) ? property : [property], function(_, prop){
                         props[prop] = (element.style[camelize(prop)] || computedStyle.getPropertyValue(prop))
                     })
                     return props
