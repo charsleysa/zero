@@ -69,10 +69,8 @@
             options.data instanceof FormData ||
             options.data instanceof ArrayBuffer)
             return
-        if (options.processData && options.data && $.type(options.data) != "string"){
-            options.headers['Content-Type'] = options.headers['Content-Type'] || 'application/x-www-form-urlencoded'
+        if (options.processData && options.data && $.type(options.data) != "string")
             options.data = $.param(options.data, options.traditional)
-        }
         if (options.data && (!options.type || options.type.toUpperCase() == 'GET'))
             options.url = appendQuery(options.url, options.data)
     }
@@ -90,6 +88,7 @@
             xhr = settings.xhr()
 
         baseHeaders['X-Requested-With'] = 'XMLHttpRequest'
+        if (settings.data) baseHeaders['Content-Type'] = 'application/x-www-form-urlencoded'
 
         settings.headers = $.extend(baseHeaders, settings.headers || {})
 

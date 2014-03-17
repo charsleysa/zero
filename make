@@ -3,7 +3,7 @@ require 'shelljs/make'
 fs = require 'fs'
 os = require 'os'
 
-version    = '1.3.0'
+version    = '1.3.1'
 _zero      = 'zero'
 _zero_big  = 'zero.big'
 _js        = 'dist/{name}.js'

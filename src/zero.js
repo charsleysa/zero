@@ -682,7 +682,7 @@ var Zero = (function() {
         css: function(property, value){
             if (arguments.length < 2) {
                 var element = this[0], computedStyle = getComputedStyle(element, '')
-                if(!element) return
+                if(!element) return this
                 if (type(property) == 'string')
                     return element.style[camelize(property)] || computedStyle.getPropertyValue(property)
                 else if (isArray(property)) {
