@@ -19,9 +19,9 @@
   ]
   , "devDependencies": {
       "uglify-js": "2.4.x"
-    , "express": "3.1.x"
-    , "coffee-script": "1.5.x"
-    , "shelljs": "0.1.x"
+    , "express": "3.8.x"
+    , "coffee-script": "1.8.x"
+    , "shelljs": "0.3.x"
     , "phantomjs": "1.9.x"
   }
 }
