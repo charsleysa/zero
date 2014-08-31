@@ -1,5 +1,5 @@
 //     Zero.js
-//     (c) 2013 Stefan Andres Charsley
+//     (c) 2014 Stefan Andres Charsley
 //     Zero.js may be freely distributed under the MIT license.
 
 var Zero = (function() {
@@ -220,6 +220,9 @@ var Zero = (function() {
         dom = dom || []
         $.merge(this, dom)
         this.selector = selector || ''
+
+        // This just fixes any issues with jQuery dependent scripts
+        this.jquery = '0.0.0'
     }
 
     function extend(target, source, deep) {
@@ -283,7 +286,7 @@ var Zero = (function() {
 
     // access className property while respecting SVGAnimatedString
     function className(node, value){
-        var klass = node.className,
+        var klass = node.className || '',
             svg = klass && klass.baseVal !== undefined
 
         if (value === undefined) return svg ? klass.baseVal : klass
@@ -495,7 +498,8 @@ var Zero = (function() {
         },
         find: function(selector){
             var result, $this = this
-            if (typeof selector == 'object')
+            if (!selector) result = []
+            else if (typeof selector == 'object')
                 result = $(selector).filter(function(){
                     var node = this
                     return arr.some.call($this, function(parent){
@@ -617,13 +621,15 @@ var Zero = (function() {
         text: function(text){
             return arguments.length === 0 ?
                 (this.length > 0 ? this[0].textContent : null) :
-                this.each(function(){ this.textContent = (text === undefined) ? '' : ''+text })
+                this.each(function(idx){
+                    var newText = funcArg(this, text, idx, this.textContent)
+                    this.textContent = newText == null ? '' : ''+newText
+                })
         },
         attr: function(name, value){
             var result
-            return (typeof name == 'string' && value === undefined) ?
+            return (typeof name == 'string' && arguments.length == 1) ?
                 (this.length == 0 || this[0].nodeType !== 1 ? undefined :
-                    (name == 'value' && this[0].nodeName == 'INPUT') ? this.val() :
                     (!(result = this[0].getAttribute(name)) && name in this[0]) ? this[0][name] : result
                 ) :
                 this.each(function(idx){
@@ -637,14 +643,15 @@ var Zero = (function() {
         },
         prop: function(name, value){
             name = propMap[name] || name
-            return (value === undefined) ?
+            return (arguments.length == 1) ?
                 (this[0] && this[0][name]) :
                 this.each(function(idx){
                     this[name] = funcArg(this, value, idx, this[name])
                 })
         },
         data: function(name, value){
-            var data = this.attr('data-' + name.replace(capitalRE, '-$1').toLowerCase(), value)
+            var name = 'data-' + name.replace(capitalRE, '-$1').toLowerCase()
+            var data = (arguments.length == 1) ? this.attr(name) : this.attr(name, value)
             return data !== null ? deserializeValue(data) : undefined
         },
         val: function(value){
@@ -687,7 +694,7 @@ var Zero = (function() {
                     return element.style[camelize(property)] || computedStyle.getPropertyValue(property)
                 else if (isArray(property)) {
                     var props = {}
-                    $.each(isArray(property) ? property : [property], function(_, prop){
+                    $.each(property, function(_, prop){
                         props[prop] = (element.style[camelize(prop)] || computedStyle.getPropertyValue(prop))
                     })
                     return props
@@ -722,6 +729,7 @@ var Zero = (function() {
         addClass: function(name){
             if (!name) return this
             return this.each(function(idx){
+                if (!('className' in this)) return
                 classList = []
                 var cls = className(this), newName = funcArg(this, name, idx, cls)
                 newName.split(/\s+/g).forEach(function(klass){
@@ -732,6 +740,7 @@ var Zero = (function() {
         },
         removeClass: function(name){
             return this.each(function(idx){
+                if (!('className' in this)) return
                 if (name === undefined) return className(this, '')
                 classList = className(this)
                 funcArg(this, name, idx, classList).split(/\s+/g).forEach(function(klass){

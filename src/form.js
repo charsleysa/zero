@@ -1,13 +1,13 @@
 //     Zero.js
-//     (c) 2013 Stefan Andres Charsley
+//     (c) 2014 Stefan Andres Charsley
 //     Zero.js may be freely distributed under the MIT license.
 
 ;(function($){
     $.fn.serializeArray = function() {
-        var result = [], el
+        var type, el, result = []
         $([].slice.call(this.get(0).elements)).each(function(){
             el = $(this)
-            var type = el.attr('type')
+            type = el.attr('type')
             if (this.nodeName.toLowerCase() != 'fieldset' &&
                 !this.disabled && type != 'submit' && type != 'reset' && type != 'button' &&
                 ((type != 'radio' && type != 'checkbox') || this.checked))

@@ -1582,11 +1582,12 @@
 
             testText: function(t){
                 // test basics with zero-created DOM elements
-                t.assertEqual('',     $('<h1/>').text())
-                t.assertEqual('',     $('<h1/>').text('').text())
-                t.assertEqual('',     $('<h1/>').text(undefined).text())
-                t.assertEqual('null', $('<h1/>').text(null).text())
-                t.assertEqual('1',    $('<h1/>').text(1).text())
+                t.assertEqual('',      $('<h1/>').text())
+                t.assertEqual('',      $('<h1/>').text('').text())
+                t.assertEqual('',      $('<h1/>').text(undefined).text())
+                t.assertEqual('',      $('<h1/>').text(null).text())
+                t.assertEqual('false', $('<h1/>').text(false).text())
+                t.assertEqual('1',     $('<h1/>').text(1).text())
                 t.assertEqual('<b>a</b>', $('<h1/>').text('<b>a</b>').text())
 
                 t.assertEqual('&lt;b&gt;a&lt;/b&gt;',
@@ -1704,7 +1705,7 @@
                 values = $.map(inputs.get(), function(i){ return $(i).attr('value') })
                 t.assertEqual('Default input, Text input, Email input, Search input', values.join(', '))
 
-                inputs.val(function(i, value){ return value.replace('input', 'changed') })
+                inputs.attr('value', function(i, value){ return value.replace('input', 'changed') })
 
                 values = $.map(inputs.get(), function(i){ return $(i).attr('value') })
                 t.assertEqual('Default changed, Text changed, Email changed, Search changed', values.join(', '))

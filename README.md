@@ -79,7 +79,7 @@ Zero modules are individual files in the "src/" directory.
     <th><a href="src/detect.js#files">detect</a></th>
     <td></td>
     <td>✔</td>
-    <td>Provides <code>$.os</code> and <code>$.browser</code> information</td>
+    <td>Provides <code>$.os</code> and <code>$.browser</code> information (Deprecated)</td>
   </tr>
   <tr>
     <th><a href="src/fx.js#files">fx</a></th>
